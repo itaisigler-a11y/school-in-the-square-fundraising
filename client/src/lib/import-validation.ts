@@ -1,0 +1,438 @@
+import { insertDonorSchema } from '@shared/schema';
+import { z } from 'zod';
+
+export interface ValidationResult {
+  isValid: boolean;
+  errors: ValidationError[];
+  warnings: ValidationWarning[];
+  cleanedData: Record<string, any>;
+}
+
+export interface ValidationError {
+  field: string;
+  message: string;
+  severity: 'error' | 'warning';
+  code: string;
+}
+
+export interface ValidationWarning {
+  field: string;
+  message: string;
+  suggestion?: string;
+}
+
+export interface DryRunResult {
+  summary: {
+    totalRows: number;
+    validRows: number;
+    errorRows: number;
+    warningRows: number;
+    duplicateRows: number;
+    newRecords: number;
+    updateRecords: number;
+  };
+  validatedData: Array<{
+    rowIndex: number;
+    originalData: Record<string, any>;
+    cleanedData: Record<string, any>;
+    validation: ValidationResult;
+    duplicates: Array<{
+      donor: any;
+      matchScore: number;
+      matchReasons: string[];
+      confidence: 'high' | 'medium' | 'low';
+    }>;
+    action: 'create' | 'update' | 'skip' | 'manual_review';
+  }>;
+  fieldStatistics: Record<string, {
+    totalCount: number;
+    validCount: number;
+    emptyCount: number;
+    uniqueValues: number;
+    commonValues: Array<{ value: string; count: number }>;
+  }>;
+}
+
+export class ImportValidator {
+  private donorSchema: z.ZodSchema;
+
+  constructor() {
+    this.donorSchema = insertDonorSchema;
+  }
+
+  /**
+   * Validate a single donor record
+   */
+  validateDonorRecord(data: Record<string, any>): ValidationResult {
+    const errors: ValidationError[] = [];
+    const warnings: ValidationWarning[] = [];
+    let cleanedData = this.cleanDonorData(data);
+
+    // Schema validation
+    try {
+      cleanedData = this.donorSchema.parse(cleanedData);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        error.errors.forEach(err => {
+          errors.push({
+            field: err.path.join('.'),
+            message: err.message,
+            severity: 'error',
+            code: err.code
+          });
+        });
+      }
+    }
+
+    // Custom business rules validation
+    this.validateBusinessRules(cleanedData, errors, warnings);
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+      warnings,
+      cleanedData
+    };
+  }
+
+  /**
+   * Validate multiple donor records for dry-run
+   */
+  async validateImportData(
+    data: Array<Record<string, any>>,
+    fieldMapping: Record<string, string>,
+    options: {
+      skipDuplicates?: boolean;
+      updateExisting?: boolean;
+      duplicateStrategies?: string[];
+    } = {}
+  ): Promise<DryRunResult> {
+    const validatedData: DryRunResult['validatedData'] = [];
+    const fieldStats: Record<string, any> = {};
+    
+    let validRows = 0;
+    let errorRows = 0;
+    let warningRows = 0;
+    let duplicateRows = 0;
+    let newRecords = 0;
+    let updateRecords = 0;
+
+    // Initialize field statistics
+    Object.keys(fieldMapping).forEach(dbField => {
+      fieldStats[dbField] = {
+        totalCount: 0,
+        validCount: 0,
+        emptyCount: 0,
+        uniqueValues: new Set(),
+        valueFrequency: {}
+      };
+    });
+
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      
+      // Map fields according to field mapping
+      const mappedData: Record<string, any> = {};
+      for (const [dbField, csvField] of Object.entries(fieldMapping)) {
+        if (row[csvField] !== undefined && row[csvField] !== '') {
+          mappedData[dbField] = row[csvField];
+        }
+      }
+
+      // Validate the record
+      const validation = this.validateDonorRecord(mappedData);
+      
+      // Get duplicate matches (mock for now - would call API in real implementation)
+      const duplicates = await this.findDuplicates(mappedData, options.duplicateStrategies);
+      
+      // Determine action based on validation and duplicates
+      let action: 'create' | 'update' | 'skip' | 'manual_review' = 'create';
+      
+      if (validation.errors.length > 0) {
+        action = 'skip';
+        errorRows++;
+      } else if (duplicates.length > 0) {
+        duplicateRows++;
+        if (duplicates.some(d => d.confidence === 'high')) {
+          action = options.skipDuplicates ? 'skip' : 
+                   options.updateExisting ? 'update' : 'manual_review';
+          if (action === 'update') updateRecords++;
+        } else {
+          action = 'manual_review';
+        }
+      } else {
+        validRows++;
+        newRecords++;
+      }
+
+      if (validation.warnings.length > 0) {
+        warningRows++;
+      }
+
+      // Update field statistics
+      Object.keys(fieldMapping).forEach(dbField => {
+        const value = mappedData[dbField];
+        const stats = fieldStats[dbField];
+        
+        stats.totalCount++;
+        if (value && value.toString().trim()) {
+          stats.validCount++;
+          stats.uniqueValues.add(value);
+          stats.valueFrequency[value] = (stats.valueFrequency[value] || 0) + 1;
+        } else {
+          stats.emptyCount++;
+        }
+      });
+
+      validatedData.push({
+        rowIndex: i + 1,
+        originalData: row,
+        cleanedData: validation.cleanedData,
+        validation,
+        duplicates,
+        action
+      });
+    }
+
+    // Convert field statistics to final format
+    const fieldStatistics: DryRunResult['fieldStatistics'] = {};
+    Object.keys(fieldStats).forEach(field => {
+      const stats = fieldStats[field];
+      const commonValues = Object.entries(stats.valueFrequency)
+        .sort(([,a], [,b]) => (b as number) - (a as number))
+        .slice(0, 5)
+        .map(([value, count]) => ({ value, count: count as number }));
+
+      fieldStatistics[field] = {
+        totalCount: stats.totalCount,
+        validCount: stats.validCount,
+        emptyCount: stats.emptyCount,
+        uniqueValues: stats.uniqueValues.size,
+        commonValues
+      };
+    });
+
+    return {
+      summary: {
+        totalRows: data.length,
+        validRows,
+        errorRows,
+        warningRows,
+        duplicateRows,
+        newRecords,
+        updateRecords
+      },
+      validatedData,
+      fieldStatistics
+    };
+  }
+
+  /**
+   * Clean and transform donor data
+   */
+  private cleanDonorData(data: Record<string, any>): Record<string, any> {
+    const cleaned: Record<string, any> = {};
+
+    // Clean string fields
+    const stringFields = ['firstName', 'lastName', 'email', 'phone', 'address', 'city', 'state', 'zipCode', 'studentName', 'gradeLevel', 'notes'];
+    stringFields.forEach(field => {
+      if (data[field]) {
+        cleaned[field] = this.cleanString(data[field]);
+      }
+    });
+
+    // Clean email
+    if (cleaned.email) {
+      cleaned.email = cleaned.email.toLowerCase().trim();
+    }
+
+    // Clean phone
+    if (cleaned.phone) {
+      cleaned.phone = this.cleanPhone(cleaned.phone);
+    }
+
+    // Clean numeric fields
+    ['alumniYear', 'graduationYear'].forEach(field => {
+      if (data[field]) {
+        const num = this.parseInteger(data[field]);
+        if (num !== null) {
+          cleaned[field] = num;
+        }
+      }
+    });
+
+    // Clean boolean fields
+    ['emailOptIn', 'phoneOptIn', 'mailOptIn'].forEach(field => {
+      if (data[field] !== undefined) {
+        cleaned[field] = this.parseBoolean(data[field]);
+      }
+    });
+
+    // Set defaults
+    cleaned.country = cleaned.country || 'USA';
+    cleaned.donorType = cleaned.donorType || 'community';
+    cleaned.engagementLevel = 'new';
+    cleaned.giftSizeTier = 'grassroots';
+    cleaned.preferredContactMethod = cleaned.preferredContactMethod || 'email';
+    cleaned.isActive = true;
+
+    // Set communication preferences defaults
+    if (cleaned.emailOptIn === undefined) cleaned.emailOptIn = true;
+    if (cleaned.phoneOptIn === undefined) cleaned.phoneOptIn = false;
+    if (cleaned.mailOptIn === undefined) cleaned.mailOptIn = true;
+
+    return cleaned;
+  }
+
+  /**
+   * Apply custom business rules validation
+   */
+  private validateBusinessRules(data: Record<string, any>, errors: ValidationError[], warnings: ValidationWarning[]) {
+    // Required fields check
+    if (!data.firstName || !data.firstName.trim()) {
+      errors.push({
+        field: 'firstName',
+        message: 'First name is required',
+        severity: 'error',
+        code: 'required'
+      });
+    }
+
+    if (!data.lastName || !data.lastName.trim()) {
+      errors.push({
+        field: 'lastName',
+        message: 'Last name is required',
+        severity: 'error',
+        code: 'required'
+      });
+    }
+
+    // Email validation
+    if (data.email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(data.email)) {
+        errors.push({
+          field: 'email',
+          message: 'Invalid email format',
+          severity: 'error',
+          code: 'invalid_format'
+        });
+      }
+    } else {
+      warnings.push({
+        field: 'email',
+        message: 'Email address not provided',
+        suggestion: 'Consider collecting email addresses for better communication'
+      });
+    }
+
+    // Phone validation
+    if (data.phone) {
+      const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+      if (!phoneRegex.test(data.phone.replace(/[\s\-\(\)]/g, ''))) {
+        errors.push({
+          field: 'phone',
+          message: 'Invalid phone number format',
+          severity: 'error',
+          code: 'invalid_format'
+        });
+      }
+    }
+
+    // Alumni year validation
+    if (data.alumniYear) {
+      const currentYear = new Date().getFullYear();
+      if (data.alumniYear < 1900 || data.alumniYear > currentYear + 10) {
+        errors.push({
+          field: 'alumniYear',
+          message: `Alumni year must be between 1900 and ${currentYear + 10}`,
+          severity: 'error',
+          code: 'invalid_range'
+        });
+      }
+    }
+
+    // ZIP code validation
+    if (data.zipCode) {
+      const zipRegex = /^\d{5}(-\d{4})?$/;
+      if (!zipRegex.test(data.zipCode)) {
+        warnings.push({
+          field: 'zipCode',
+          message: 'ZIP code format may be invalid',
+          suggestion: 'Use 5-digit or 9-digit ZIP code format (e.g., 12345 or 12345-6789)'
+        });
+      }
+    }
+
+    // Donor type validation
+    const validDonorTypes = ['parent', 'alumni', 'community', 'staff', 'board', 'foundation', 'business'];
+    if (data.donorType && !validDonorTypes.includes(data.donorType)) {
+      warnings.push({
+        field: 'donorType',
+        message: `Unknown donor type: ${data.donorType}`,
+        suggestion: `Valid types: ${validDonorTypes.join(', ')}`
+      });
+      data.donorType = 'community'; // Default fallback
+    }
+
+    // Logical validations
+    if (data.donorType === 'alumni' && !data.alumniYear) {
+      warnings.push({
+        field: 'alumniYear',
+        message: 'Alumni donors should have an alumni year specified',
+        suggestion: 'Add graduation year for better donor classification'
+      });
+    }
+
+    if (data.donorType === 'parent' && !data.studentName) {
+      warnings.push({
+        field: 'studentName',
+        message: 'Parent donors should have student name specified',
+        suggestion: 'Add student name to link parent to current student'
+      });
+    }
+  }
+
+  /**
+   * Mock duplicate detection (would call API in real implementation)
+   */
+  private async findDuplicates(data: Record<string, any>, strategies: string[] = ['exact_email']): Promise<Array<{
+    donor: any;
+    matchScore: number;
+    matchReasons: string[];
+    confidence: 'high' | 'medium' | 'low';
+  }>> {
+    // In real implementation, this would call the API
+    // For now, return empty array
+    return [];
+  }
+
+  // Helper methods
+  private cleanString(value: any): string {
+    return value ? value.toString().trim() : '';
+  }
+
+  private cleanPhone(phone: string): string {
+    // Remove all non-digits, then format consistently
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length === 10) {
+      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    } else if (digits.length === 11 && digits[0] === '1') {
+      return `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+    }
+    return digits; // Return cleaned digits if format unknown
+  }
+
+  private parseInteger(value: any): number | null {
+    const num = parseInt(value);
+    return isNaN(num) ? null : num;
+  }
+
+  private parseBoolean(value: any): boolean {
+    if (typeof value === 'boolean') return value;
+    const str = value.toString().toLowerCase().trim();
+    return ['true', 'yes', '1', 'y', 'on', 'checked'].includes(str);
+  }
+}
+
+export const importValidator = new ImportValidator();
