@@ -1,0 +1,271 @@
+Build a comprehensive, production-ready fundraising management platform for School in the Square, a NYC public charter school. This should be a full-stack web application with world-class UI/UX design and complete fundraising workflow management.
+
+## SCHOOL BRANDING & IDENTITY
+Implement School in the Square's visual identity:
+- Organization: School in the Square (nickname: S2)
+- Mission: "We engage, educate and empower our students to respond mindfully and creatively to life's opportunities and challenges"
+- Color scheme: Primary green, navy, grey, black on white backgrounds
+- Design philosophy: Clean, professional, education-focused, community-centered
+- Target users: School administrators, development team, donors (parents, alumni, community supporters)
+
+## TECHNICAL ARCHITECTURE
+Create a modern, scalable architecture using:
+- Frontend: React with TypeScript for type safety
+- UI Framework: Chakra UI or Material UI for accessibility-first components
+- Backend: Node.js with Express
+- Database: PostgreSQL with Prisma ORM for security
+- Authentication: Implement Replit Auth with role-based access control
+- API Integration: OpenAI API for intelligent features (use environment variables for API keys) 
+- Deployment: Configure for Replit autoscale deployment
+
+## CORE FEATURES TO IMPLEMENT
+
+### 1. Data Management System
+- CSV/Excel import functionality with field mapping and duplicate detection 
+- Donor database with comprehensive profiles including:
+  - Contact information and communication preferences
+  - Giving history with automated lifetime value calculations 
+  - Engagement scoring and interaction timeline 
+  - Custom fields for school-specific data
+  - Household/family relationship tracking
+- Automated data validation and cleaning
+- Export capabilities in multiple formats
+
+### 2. Dashboard & Analytics (High Priority)
+Create a responsive dashboard with:
+- Real-time fundraising thermometers showing campaign progress 
+- Key metrics displayed prominently:
+  - Donor retention rate (current vs previous year) 
+  - Average gift size and growth rate 
+  - Campaign ROI and cost per dollar raised
+  - Donor acquisition and lapse rates 
+- Interactive data visualizations using Chart.js or D3.js: 
+  - Bar charts for campaign comparisons 
+  - Line graphs for donation trends 
+  - Progress indicators for goals 
+- Customizable widgets with drag-and-drop functionality 
+- Mobile-responsive design with touch gestures 
+
+### 3. Campaign Management
+Implement three-phase workflow system: 
+
+PRE-SEASON PLANNING:
+- Donor segmentation tools with dynamic filters 
+- Goal setting interface with SMART framework 
+- Campaign calendar with timeline management 
+- Historical data analysis with year-over-year comparisons 
+
+ACTIVE CAMPAIGN:
+- Multi-channel campaign coordination (email, direct mail, social)
+- Team collaboration features with task assignments 
+- Automated thank-you messages and receipts 
+- Event management integration
+- Real-time progress tracking 
+
+POST-CAMPAIGN:
+- ROI analysis and performance metrics
+- Donor retention analytics 
+- Automated stewardship workflows
+- Predictive modeling for future campaigns 
+
+### 4. Donor Communication Hub
+- Email template builder with personalization tokens
+- Automated communication workflows:
+  - Welcome series for new donors 
+  - Thank-you sequences based on gift level 
+  - Re-engagement campaigns for lapsed donors
+  - Upgrade prompts for recurring donors 
+- A/B testing capabilities for subject lines and content
+- Integration with communication preferences
+
+### 5. OpenAI Integration Features
+Implement intelligent features using OpenAI API: 
+- Personalized donation appeal generator 
+- Grant proposal assistant 
+- Donor research summarization 
+- Campaign content creation for multiple channels 
+- Sentiment analysis for donor communications 
+
+Use this prompt structure for OpenAI calls: 
+"You are an experienced fundraising professional for School in the Square. [specific task]. Target audience: [donor segment]. Tone: warm and community-focused. Include specific impact on students."
+
+### 6. Security & Compliance
+- Implement PCI compliance for payment processing 
+- SSL/TLS encryption for all data transmission
+- Role-based access control with these roles:
+  - Administrator (full access)
+  - Development Officer (donor management)
+  - Finance (reporting only)
+  - Volunteer (limited event access)
+- Audit trails for all data changes
+- GDPR/CCPA compliance with consent management 
+- Automated backups and disaster recovery
+
+## UI/UX REQUIREMENTS
+
+### Design System
+- Implement WCAG 2.2 AA accessibility standards 
+- Color contrast ratio minimum 4.5:1 
+- Mobile-first responsive design 
+- Touch-friendly navigation (44px minimum touch targets) 
+- Keyboard navigation support throughout 
+- Screen reader compatibility with ARIA labels 
+
+### User Experience Flow
+1. Progressive onboarding with role detection 
+2. Dashboard as primary landing page
+3. Quick actions menu for common tasks
+4. Contextual help with tooltips 
+5. Search functionality across all data
+6. Breadcrumb navigation for complex workflows
+
+### Visual Design
+- Clean, professional interface  with School in the Square colors
+- Card-based layouts for information organization
+- Data tables with sorting, filtering, and inline editing
+- Loading states and progress indicators 
+- Success/error messaging with clear actions
+- Print-friendly views for reports
+
+## CRITICAL IMPLEMENTATION DETAILS
+
+### Performance Optimization
+- Lazy loading for large datasets 
+- Image optimization with WebP format 
+- Implement caching strategies for API calls 
+- Pagination for data tables  (25 items default)
+- Debounced search inputs
+- Optimized database queries with indexes
+
+### Error Handling
+- Graceful error recovery with user-friendly messages
+- Retry logic with exponential backoff for API calls 
+- Fallback content when services unavailable
+- Form validation with inline error messages
+- Automatic save drafts for long forms
+
+### Testing Requirements
+Use App Testing feature to verify:
+- All forms submit correctly
+- Data imports work with various file formats
+- Dashboard metrics calculate accurately
+- Email templates render properly
+- Mobile responsiveness across devices
+- Role-based permissions function correctly
+- API integrations handle errors gracefully
+
+## DEVELOPMENT APPROACH
+1. Start with database schema and authentication
+2. Build donor management CRUD operations
+3. Implement CSV import functionality
+4. Create dashboard with basic metrics
+5. Add campaign management features
+6. Integrate OpenAI for intelligent features 
+7. Implement communication workflows
+8. Add analytics and reporting
+9. Conduct thorough testing
+10. Optimize performance and security
+
+## SUCCESS CRITERIA
+The application should:
+- Load in under 2 seconds 
+- Handle 10,000+ donor records efficiently
+- Process CSV imports of 5,000+ rows
+- Support 50+ concurrent users
+- Achieve 99.9% uptime
+- Pass WCAG 2.2 AA accessibility audit 
+- Provide ROI tracking accurate to the penny
+- Generate personalized communications in <3 seconds
+
+Build this incrementally, testing each feature thoroughly before moving to the next. Use comments to explain complex logic. Prioritize user experience and data security throughout development.
+Prompting Best Practices for Replit Agent 3
+Initial Setup Instructions
+When starting the project, use this enhanced prompt structure:
+Enable Extended Thinking and High Power Mode. Use Maximum Autonomy for this complex project. 
+
+Set up the project in Full App Mode with automated browser testing enabled.  This is a production-grade fundraising platform that needs professional architecture and implementation.
+
+Create checkpoints after completing each major feature.  Use the 200-minute extended runtime to thoroughly implement and test each component. 
+Incremental Development Prompts
+After the initial build, use these follow-up prompts for specific enhancements:
+For Data Import Enhancement:
+Enhance the CSV import to handle edge cases: duplicate detection using fuzzy matching, automatic data type detection, preview mode showing first 10 rows with field mapping suggestions, and detailed error reporting with row numbers and specific issues. Test with malformed CSVs and files over 10,000 rows.
+For Dashboard Optimization:
+Optimize the dashboard for performance: implement React.memo for components, use virtual scrolling for large datasets, add skeleton loaders during data fetching, cache API responses for 5 minutes, and ensure all charts render within 500ms. Test with 50,000 donor records.
+For OpenAI Integration:
+Implement intelligent donor communication features: create a prompt template system for different donor segments, add response caching to reduce API costs, implement token counting before API calls, use GPT-4o-mini for cost efficiency, and add a preview mode before sending. Include rate limiting and error handling. 
+Testing and Debugging Prompts
+For Comprehensive Testing:
+Run full App Testing on all critical user flows: new donor registration, CSV import with 1000 rows, donation processing, campaign creation, email template generation, dashboard metric calculations, and mobile responsiveness. Fix any identified issues and re-test. 
+For Security Audit:
+Conduct a security review: verify all API keys are in environment variables, check for SQL injection vulnerabilities in all queries, ensure passwords are hashed with bcrypt, validate all user inputs, implement CSRF protection, add rate limiting to prevent abuse, and verify PCI compliance for payment data handling. 
+Advanced Feature Prompts
+For Automation Features:
+Build an automated donor journey system using Agents & Automations. Create workflows for: new donor welcome sequences triggered by first donation, monthly giving upgrade prompts based on giving history, lapsed donor re-engagement after 12 months of inactivity, and birthday acknowledgments.  Connect these to the email system and track engagement metrics. 
+For Predictive Analytics:
+Implement predictive donor scoring: analyze historical giving patterns to predict likelihood of future donations, identify major gift prospects based on capacity indicators, calculate optimal ask amounts using past response data, and predict best contact times. Display these insights on donor profiles with confidence scores. 
+Technical Implementation Guidelines
+Database Schema Optimization
+The subagents' research indicates these essential database tables:
+sql-- Core tables structure
+donors (id, first_name, last_name, email, phone, address, created_at, updated_at)
+donations (id, donor_id, amount, campaign_id, date, payment_method, status)
+campaigns (id, name, goal, start_date, end_date, description, status)
+communications (id, donor_id, type, subject, content, sent_at, opened_at, clicked_at)
+segments (id, name, criteria_json, donor_count, last_updated)
+users (id, email, role, permissions_json, last_login)
+API Integration Patterns
+Based on the OpenAI integration research:
+javascript// Secure API configuration
+const openAIConfig = {
+  apiKey: process.env.OPENAI_API_KEY,
+  model: 'gpt-4o-mini', // Cost-effective for most tasks 
+  maxTokens: 500,
+  temperature: 0.3, // Lower for consistent outputs 
+  retryAttempts: 3,
+  retryDelay: 1000
+};
+
+// Implement caching layer 
+const promptCache = new Map();
+const getCachedOrGenerate = async (prompt, cacheKey) => {
+  if (promptCache.has(cacheKey)) {
+    return promptCache.get(cacheKey);
+  }
+  const result = await generateContent(prompt);
+  promptCache.set(cacheKey, result);
+  return result;
+};
+Performance Optimization Strategies
+The research reveals these critical optimizations:
+
+Frontend Performance:
+
+Code splitting with React.lazy()
+Image lazy loading with Intersection Observer
+Service Worker for offline functionality
+Memoization for expensive calculations
+
+
+Backend Performance:
+
+Database connection pooling
+Redis caching for frequently accessed data CloudZeroHolori
+Batch processing for bulk operations Medium
+Asynchronous job queues for heavy tasks
+
+
+API Performance:
+
+Response compression with gzip
+ETags for cache validation
+Pagination with cursor-based navigation
+GraphQL for flexible data fetching
+
+
+
+Monitoring and Maintenance Prompts
+For Production Monitoring:
+Add comprehensive monitoring: implement error tracking with stack traces, create performance metrics for page load times, add user activity logging for audit trails, monitor API usage and costs, track database query performance, and create alerts for system issues. Display key metrics on an admin dashboard. 
+For Continuous Improvement:
+Implement A/B testing framework: create feature flags for gradual rollouts, add event tracking for user interactions, implement conversion funnel analysis, track donation form abandonment rates, and measure email engagement metrics. Use this data to generate improvement recommendations.
