@@ -1,0 +1,200 @@
+Perfect! Let's unleash Agent 3's full autonomous potential. Here's the ultimate comprehensive prompt to maximize the 200-minute runtime:
+
+Ultimate Autonomous Build Prompt for 200-Minute Session
+Build the COMPLETE fundraising management platform for School in the Square using your MAXIMUM 200-minute autonomous capability. Work continuously without checkpoints. Enable Extended Thinking and High Power Mode.
+
+## FULL AUTONOMY INSTRUCTIONS
+
+You have complete freedom to make architectural decisions. Build the entire application end-to-end, implementing ALL features comprehensively. Use your judgment for:
+- Choosing the best libraries and frameworks
+- Implementing optimal database schemas
+- Creating beautiful UI/UX without asking for feedback
+- Writing comprehensive tests
+- Handling edge cases and error scenarios
+- Performance optimizations
+- Security implementations
+
+## COMPLETE FEATURE IMPLEMENTATION
+
+Build EVERYTHING in the plan, plus:
+
+1. **Advanced Donor Intelligence System**
+   - Predictive giving likelihood scores using historical patterns
+   - Optimal ask amount calculations
+   - Best contact time predictions
+   - Donor lifetime value projections
+   - Churn risk indicators with automated alerts
+   - Wealth capacity screening simulation
+
+2. **Comprehensive Automation Suite**
+   - New donor welcome journey (5-email series)
+   - Monthly giving upgrade campaigns
+   - Lapsed donor win-back sequences (3, 6, 12 months)
+   - Birthday and anniversary acknowledgments
+   - Year-end tax receipt generation
+   - Matching gift reminders
+   - Volunteer hour tracking and conversion
+
+3. **Full Analytics Platform**
+   - Cohort analysis for donor retention
+   - Attribution modeling for campaigns
+   - Predictive revenue forecasting
+   - A/B test framework for all communications
+   - Custom report builder with drag-and-drop
+   - Scheduled report delivery via email
+   - Board-ready presentation mode
+
+4. **Complete Communication Center**
+   - Multi-channel orchestration (email, SMS simulation, direct mail tracking)
+   - Dynamic content personalization
+   - Behavioral trigger campaigns
+   - Survey and feedback collection
+   - Event invitation management
+   - Newsletter builder with templates
+   - Social media post scheduler simulation
+
+5. **Enterprise Features**
+   - Multi-campus support (if school expands)
+   - Fiscal year configuration
+   - Pledge payment tracking and reminders
+   - Recurring gift management
+   - Grant tracking with deadlines
+   - Major gift pipeline with moves management
+   - Peer-to-peer fundraising campaigns
+   - Alumni reunion giving campaigns
+
+6. **AI-Powered Features (Full Implementation)**
+   - Intelligent donor research summarization
+   - Grant proposal generator with school data
+   - Thank-you letter personalization engine
+   - Campaign strategy recommendations
+   - Email subject line optimizer
+   - Donor conversation simulator for training
+   - Meeting notes transcription (simulated)
+   - Social media content generator
+
+7. **Advanced Technical Features**
+   - Real-time collaboration with live cursors
+   - Offline mode with sync capabilities
+   - Voice commands for accessibility
+   - Dark mode with system preference detection
+   - Multi-language support (English, Spanish)
+   - Keyboard shortcuts for power users
+   - Bulk operations with queue processing
+   - Webhook system for integrations
+   - API with documentation
+   - GraphQL endpoint option
+
+## TECHNICAL EXCELLENCE REQUIREMENTS
+
+**Architecture:**
+- Implement microservices pattern where beneficial
+- Use Redis for caching (simulated with in-memory if not available)
+- Implement WebSocket for real-time updates
+- Create a job queue for background tasks
+- Use database transactions for data integrity
+- Implement optimistic UI updates
+- Add service worker for PWA capabilities
+
+**Performance Targets:**
+- Time to Interactive: <1.5 seconds
+- Largest Contentful Paint: <2 seconds
+- First Input Delay: <100ms
+- Cumulative Layout Shift: <0.1
+- Database queries: <50ms average
+- API response time: <200ms p95
+- Support 100,000+ donor records
+- Handle 1000 concurrent users
+
+**Code Quality:**
+- 80%+ test coverage
+- ESLint and Prettier configured
+- TypeScript strict mode enabled
+- Comprehensive error logging
+- Performance monitoring hooks
+- Memory leak prevention
+- Code splitting for all routes
+- Tree shaking for minimal bundle size
+
+## DATA POPULATION
+
+Generate comprehensive seed data:
+- 500 donors with realistic profiles and giving histories
+- 5 years of historical donation data
+- 20 campaigns with varied success rates
+- 100 email templates across all categories
+- 50 foundation profiles with grant histories
+- 1000 communication logs
+- Realistic engagement metrics
+- School-specific event history
+
+## DEPLOYMENT READY
+
+Make it production-ready:
+- Environment variables for all configurations
+- Database migrations set up
+- Deployment scripts configured
+- Health monitoring endpoints
+- Graceful shutdown handling
+- Rate limiting on all endpoints
+- CORS properly configured
+- Security headers implemented
+- Robots.txt and sitemap.xml
+- Complete documentation in README.md
+
+## QUALITY ASSURANCE
+
+Implement comprehensive testing:
+- Unit tests for all utilities
+- Integration tests for API endpoints
+- E2E tests for critical user journeys
+- Load testing simulation results
+- Accessibility audit passing
+- Security scan results
+- Performance benchmarks documented
+- Cross-browser compatibility verified
+
+## USE YOUR FULL CAPABILITIES
+
+- Leverage App Testing throughout development
+- Use Agents & Automations for workflow creation
+- Implement Extensions where beneficial
+- Create custom tools as needed
+- Use maximum context window
+- Apply advanced reasoning for complex features
+- Self-review and refactor code for optimization
+- Debug and fix issues autonomously
+
+## SUCCESS METRICS
+
+By the end of 200 minutes, deliver:
+1. Fully functional application with ALL features working
+2. Beautiful, professional UI that rivals commercial solutions
+3. Complete test suite with passing tests
+4. Comprehensive documentation
+5. Demo mode with realistic data
+6. Performance meeting all targets
+7. Security best practices implemented
+8. Ready for immediate deployment
+
+Don't ask for clarification - make executive decisions using best practices. Build something that would make School in the Square say "This exceeds our wildest expectations!" 
+
+Create a fundraising platform that could be sold as a SaaS product to other schools. Go beyond the requirements. Surprise me with innovative features I haven't even thought of.
+
+You have 200 minutes. Build something extraordinary. Begin now.
+Why This Approach Works
+This prompt:
+
+Removes all constraints that might cause the agent to pause
+Provides comprehensive context so it never needs clarification
+Sets ambitious goals that utilize the full 200 minutes
+Empowers autonomous decisions with "make executive decisions"
+Includes stretch goals to use all available time productively
+Specifies quality metrics to ensure professional output
+Just paste this prompt and click "Build the entire app". Then let Agent 3 work its magic for the full 200 minutes uninterrupted. You'll come back to a complete, production-ready fundraising platform!
+
+
+
+
+
+
