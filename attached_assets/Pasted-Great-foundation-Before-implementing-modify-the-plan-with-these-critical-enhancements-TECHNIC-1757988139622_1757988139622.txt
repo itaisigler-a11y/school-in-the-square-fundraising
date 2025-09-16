@@ -1,0 +1,123 @@
+Great foundation! Before implementing, modify the plan with these critical enhancements:
+
+## TECHNICAL CLARIFICATIONS
+
+1. **Architecture Specifics:**
+   - Use React 18 with TypeScript for the frontend
+   - Backend: Node.js + Express + PostgreSQL with Prisma ORM
+   - State management: Zustand or Context API (avoid Redux for simplicity)
+   - Styling: Tailwind CSS or Chakra UI for rapid development
+   - Deploy with Replit's built-in hosting
+
+2. **Payment Processing Clarification:**
+   - Stripe is optional - focus first on TRACKING donations imported from CSV/Excel
+   - If implementing Stripe, use it only for recording payment metadata, not processing
+   - Priority is donor data management, not payment collection
+
+3. **OpenAI Integration Refinement:**
+   - Use GPT-4o-mini model for cost efficiency ($0.15 per 1M tokens)
+   - Implement response caching to minimize API calls
+   - Add a "credits used" tracker visible to administrators
+   - Include prompt templates that users can customize
+   - Set max tokens to 500 for most operations
+
+## PHASED DEVELOPMENT APPROACH
+
+Build in this specific order for maximum efficiency:
+
+**Phase 1 - Core Foundation (Build First):**
+- Database schema and authentication system
+- CSV/Excel import with preview and field mapping
+- Basic donor CRUD operations
+- Simple dashboard with key metrics
+
+**Phase 2 - Campaign Features:**
+- Three-stage campaign workflow:
+  * Pre-season: Segmentation and goal setting
+  * Active: Progress tracking and team collaboration  
+  * Post-campaign: ROI analysis and retention metrics
+- Email template system with merge tags
+- Automated thank-you workflows
+
+**Phase 3 - Intelligence Layer:**
+- OpenAI features with usage monitoring
+- Predictive donor scoring
+- Advanced analytics and visualizations
+- A/B testing for communications
+
+## CRITICAL FEATURES TO EMPHASIZE
+
+1. **Data Import Excellence:**
+   - Handle files up to 50MB
+   - Support .csv, .xlsx, .xls formats
+   - Show import preview with first 10 rows
+   - Intelligent field mapping suggestions
+   - Duplicate detection using email + name matching
+   - Import history log with rollback capability
+
+2. **Dashboard Priorities:**
+   - Load time under 2 seconds
+   - Real-time updates without page refresh
+   - Mobile swipe gestures for navigation
+   - Exportable charts as PNG/PDF
+   - Customizable date ranges
+   - Role-based widget visibility
+
+3. **Donor Segmentation Engine:**
+   - Dynamic segments based on:
+     * Giving frequency (monthly, quarterly, annual, lapsed)
+     * Gift size tiers (major, mid-level, grassroots)
+     * Engagement level (email opens, event attendance)
+     * Lifecycle stage (new, active, at-risk, lapsed)
+   - Save segment definitions for reuse
+   - Export segments for targeted campaigns
+
+## PERFORMANCE REQUIREMENTS
+
+- Initial page load: < 2 seconds
+- CSV import: Process 5,000 rows in < 30 seconds
+- Dashboard refresh: < 500ms
+- Search results: < 200ms
+- Implement pagination (25 items default, adjustable)
+- Use React.memo and useMemo for optimization
+- Lazy load images and non-critical components
+
+## TESTING CHECKPOINTS
+
+After each phase, verify:
+- All forms have validation and error handling
+- Mobile responsiveness on iPhone and Android
+- Accessibility with keyboard navigation
+- Data exports match displayed information
+- API rate limiting prevents abuse
+- User permissions restrict appropriate features
+
+## SCHOOL IN THE SQUARE SPECIFICS
+
+Research and implement their actual branding:
+- Primary green: #2E7D32 or similar
+- Navy: #1A237E or similar  
+- Include their logo if publicly available
+- Use their mission statement in the footer
+- Add school-specific fields: Grade level, Student name, Alumni year
+
+## DATA SECURITY PRIORITIES
+
+- No credit card data stored locally (use Stripe tokenization if needed)
+- Encrypt sensitive fields at rest
+- Session timeout after 30 minutes
+- Password requirements: 8+ chars, mixed case, number, symbol
+- Two-factor authentication for administrators
+- Daily automated backups
+
+## IMMEDIATE START FOCUS
+
+Begin with these exact components in order:
+1. Set up PostgreSQL database with Prisma
+2. Create authentication with Replit Auth
+3. Build donor table with CRUD operations
+4. Implement CSV import with field mapping UI
+5. Create basic dashboard with 5 key metrics
+6. Add School in the Square branding
+
+Show me the updated plan with these modifications before starting development. Prioritize a working MVP over perfect features - we can iterate after the core functionality is solid.
