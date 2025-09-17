@@ -521,12 +521,20 @@ export function DonorForm({ onSuccess, donor, isEditing = false }: DonorFormProp
           >
             Cancel
           </Button>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isLoading}
             data-testid="button-save-donor"
+            className="min-w-[140px] transition-all duration-200"
           >
-            {isLoading ? "Saving..." : isEditing ? "Update Donor" : "Create Donor"}
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                Saving...
+              </div>
+            ) : (
+              isEditing ? "Update Donor" : "Create Donor"
+            )}
           </Button>
         </div>
       </form>
