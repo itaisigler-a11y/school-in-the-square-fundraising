@@ -21,11 +21,15 @@ declare global {
 // Enhanced authentication middleware that also loads user role
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   try {
-    // Development bypass for localhost testing
+    // Development bypass for localhost testing - SECURITY: Only in development
     const isLocalhost = req.hostname === 'localhost' || req.hostname === '127.0.0.1';
-    const isDevelopment = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
+    const isDevelopment = process.env.NODE_ENV === 'development';
+    const bypassEnabled = process.env.DEV_AUTH_BYPASS === 'true';
     
-    if (isLocalhost && isDevelopment) {
+    if (isLocalhost && isDevelopment && bypassEnabled) {
+      // Security warning for development bypass
+      console.warn('🚨 SECURITY: Development authentication bypass active');
+      
       // Create a mock authenticated user for development
       req.userId = 'dev-user-42713029';
       req.userRole = 'development_officer';
@@ -45,7 +49,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
           userData = await storage.getUser('dev-user-42713029');
         }
         
-        // Skip audit logging for development
+        // Log development access
         console.log('🔓 Development authentication bypass for localhost');
         return next();
       } catch (error) {

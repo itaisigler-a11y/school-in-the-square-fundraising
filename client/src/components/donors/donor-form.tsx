@@ -277,7 +277,7 @@ export function DonorForm({ onSuccess, donor, isEditing = false }: DonorFormProp
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Donor Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
                     <FormControl>
                       <SelectTrigger data-testid="select-donor-type">
                         <SelectValue placeholder="Select donor type" />
@@ -361,7 +361,7 @@ export function DonorForm({ onSuccess, donor, isEditing = false }: DonorFormProp
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Engagement Level</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
                     <FormControl>
                       <SelectTrigger data-testid="select-engagement-level">
                         <SelectValue placeholder="Select engagement level" />
@@ -386,7 +386,7 @@ export function DonorForm({ onSuccess, donor, isEditing = false }: DonorFormProp
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Gift Size Tier</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
                     <FormControl>
                       <SelectTrigger data-testid="select-gift-size-tier">
                         <SelectValue placeholder="Select gift size tier" />
@@ -411,7 +411,7 @@ export function DonorForm({ onSuccess, donor, isEditing = false }: DonorFormProp
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Preferred Contact Method</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select onValueChange={field.onChange} value={field.value || ""}>
                   <FormControl>
                     <SelectTrigger data-testid="select-contact-method">
                       <SelectValue placeholder="Select preferred contact method" />

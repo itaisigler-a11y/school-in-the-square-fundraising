@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,7 +8,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { EmailTemplateBuilder } from "@/components/communications/email-template-builder";
+import { CommunicationForm } from "@/components/communications/communication-form";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { isUnauthorizedError } from "@/lib/authUtils";
+import type { Communication } from "@shared/schema";
+import { Plus, Eye, Edit2, Trash2, Send } from "lucide-react";
 
 export default function Communications() {
   const [search, setSearch] = useState("");
@@ -16,6 +23,13 @@ export default function Communications() {
   const [status, setStatus] = useState<string>("all");
   const [page, setPage] = useState(1);
   const [isTemplateBuilderOpen, setIsTemplateBuilderOpen] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [editCommunication, setEditCommunication] = useState<Communication | null>(null);
+  const [deleteCommunication, setDeleteCommunication] = useState<Communication | null>(null);
+  const [viewCommunication, setViewCommunication] = useState<Communication | null>(null);
+  
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["/api/communications", { 
@@ -25,10 +39,68 @@ export default function Communications() {
       page, 
       limit: 25 
     }],
+    staleTime: 30000,
+    refetchInterval: false,
+    refetchOnWindowFocus: false,
+    gcTime: 60000,
+  });
+
+  // Delete communication mutation
+  const deleteCommunicationMutation = useMutation({
+    mutationFn: async (communicationId: string) => {
+      const response = await apiRequest("DELETE", `/api/communications/${communicationId}`);
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Communication deleted successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/communications"], exact: false });
+      setDeleteCommunication(null);
+      refetch();
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete communication",
+        variant: "destructive",
+      });
+    },
   });
 
   const communications = (data as any)?.communications || [];
   const total = (data as any)?.total || 0;
+
+  const handleEditCommunication = (communication: Communication) => {
+    setEditCommunication(communication);
+  };
+
+  const handleDeleteCommunication = (communication: Communication) => {
+    setDeleteCommunication(communication);
+  };
+
+  const handleViewCommunication = (communication: Communication) => {
+    setViewCommunication(communication);
+  };
+
+  const confirmDeleteCommunication = () => {
+    if (deleteCommunication?.id) {
+      deleteCommunicationMutation.mutate(deleteCommunication.id);
+    }
+  };
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
@@ -68,9 +140,31 @@ export default function Communications() {
         </div>
         
         <div className="flex gap-3">
+          <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+            <DialogTrigger asChild>
+              <Button data-testid="button-create-communication">
+                <Plus className="mr-2 h-4 w-4" />New Communication
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto">
+              <DialogHeader>
+                <DialogTitle>Create Communication</DialogTitle>
+                <DialogDescription>
+                  Create a new communication record to track donor interactions.
+                </DialogDescription>
+              </DialogHeader>
+              <CommunicationForm 
+                onSuccess={() => {
+                  setIsCreateOpen(false);
+                  refetch();
+                }} 
+              />
+            </DialogContent>
+          </Dialog>
+
           <Dialog open={isTemplateBuilderOpen} onOpenChange={setIsTemplateBuilderOpen}>
             <DialogTrigger asChild>
-              <Button data-testid="button-create-template">
+              <Button variant="outline" data-testid="button-create-template">
                 <i className="fas fa-magic mr-2"></i>Create Template
               </Button>
             </DialogTrigger>
@@ -91,7 +185,7 @@ export default function Communications() {
           </Dialog>
           
           <Button variant="outline" data-testid="button-send-campaign">
-            <i className="fas fa-paper-plane mr-2"></i>Send Campaign
+            <Send className="mr-2 h-4 w-4" />Send Campaign
           </Button>
         </div>
       </div>
@@ -292,20 +386,30 @@ export default function Communications() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex gap-2">
+                          <div className="flex gap-1">
                             <Button 
                               variant="ghost" 
                               size="sm"
+                              onClick={() => handleViewCommunication(communication)}
                               data-testid={`button-view-communication-${communication.id}`}
                             >
-                              <i className="fas fa-eye"></i>
+                              <Eye className="h-4 w-4" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="sm"
+                              onClick={() => handleEditCommunication(communication)}
                               data-testid={`button-edit-communication-${communication.id}`}
                             >
-                              <i className="fas fa-edit"></i>
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleDeleteCommunication(communication)}
+                              data-testid={`button-delete-communication-${communication.id}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                             {communication.status === 'draft' && (
                               <Button 
@@ -313,7 +417,7 @@ export default function Communications() {
                                 size="sm"
                                 data-testid={`button-send-communication-${communication.id}`}
                               >
-                                <i className="fas fa-paper-plane"></i>
+                                <Send className="h-4 w-4" />
                               </Button>
                             )}
                           </div>
@@ -327,6 +431,121 @@ export default function Communications() {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Communication Dialog */}
+      <Dialog open={editCommunication !== null} onOpenChange={(open) => !open && setEditCommunication(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Communication</DialogTitle>
+            <DialogDescription>
+              Update the communication details and tracking information.
+            </DialogDescription>
+          </DialogHeader>
+          {editCommunication && (
+            <CommunicationForm 
+              communication={editCommunication}
+              isEditing={true}
+              onSuccess={() => {
+                setEditCommunication(null);
+                refetch();
+              }} 
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* View Communication Dialog */}
+      <Dialog open={viewCommunication !== null} onOpenChange={(open) => !open && setViewCommunication(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Communication Details</DialogTitle>
+          </DialogHeader>
+          {viewCommunication && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Type</p>
+                  <p className="capitalize">{viewCommunication.type}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Status</p>
+                  <Badge className={getStatusBadgeColor(viewCommunication.status)}>
+                    {viewCommunication.status}
+                  </Badge>
+                </div>
+              </div>
+              
+              {viewCommunication.subject && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Subject</p>
+                  <p>{viewCommunication.subject}</p>
+                </div>
+              )}
+              
+              {viewCommunication.content && (
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Content</p>
+                  <div className="bg-muted p-3 rounded-lg max-h-40 overflow-y-auto">
+                    <p className="whitespace-pre-wrap">{viewCommunication.content}</p>
+                  </div>
+                </div>
+              )}
+              
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                {viewCommunication.sentAt && (
+                  <div>
+                    <p className="font-medium text-muted-foreground">Sent At</p>
+                    <p>{formatDate(viewCommunication.sentAt.toString())}</p>
+                  </div>
+                )}
+                {viewCommunication.openedAt && (
+                  <div>
+                    <p className="font-medium text-muted-foreground">Opened At</p>
+                    <p>{formatDate(viewCommunication.openedAt.toString())}</p>
+                  </div>
+                )}
+                {viewCommunication.clickedAt && (
+                  <div>
+                    <p className="font-medium text-muted-foreground">Clicked At</p>
+                    <p>{formatDate(viewCommunication.clickedAt.toString())}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteCommunication !== null} onOpenChange={(open) => !open && setDeleteCommunication(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Communication</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this communication? This action cannot be undone.
+              {deleteCommunication && (
+                <div className="mt-2 p-2 bg-muted rounded">
+                  <p className="font-medium">{deleteCommunication.subject || "No Subject"}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Type: {getTypeLabel(deleteCommunication.type)} • Status: {deleteCommunication.status}
+                  </p>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-delete">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteCommunication}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteCommunicationMutation.isPending}
+              data-testid="button-confirm-delete"
+            >
+              {deleteCommunicationMutation.isPending ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

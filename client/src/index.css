@@ -4,80 +4,178 @@
 @tailwind utilities;
 
 :root {
-  /* School in the Square Brand Colors - Navy/Charcoal Theme */
+  /* School in the Square Brand Colors */
   --background: hsl(0 0% 100%);
-  --foreground: hsl(215 25% 27%);
+  --foreground: hsl(217 32% 17%); /* Deep school blue for text */
   --card: hsl(0 0% 100%);
-  --card-foreground: hsl(215 25% 27%);
+  --card-foreground: hsl(217 32% 17%);
   --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(215 25% 27%);
-  --primary: hsl(215 25% 27%); /* School in the Square Navy/Charcoal */
+  --popover-foreground: hsl(217 32% 17%);
+  --primary: hsl(217 91% 60%); /* School Blue #2563eb */
   --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(215 20% 91%);
-  --secondary-foreground: hsl(215 25% 27%);
-  --muted: hsl(215 20% 91%);
-  --muted-foreground: hsl(215 15% 45%);
-  --accent: hsl(217 91% 60%); /* Professional Blue Accent */
-  --accent-foreground: hsl(0 0% 100%);
+  --secondary: hsl(217 91% 95%); /* Light school blue tint */
+  --secondary-foreground: hsl(217 32% 17%);
+  --muted: hsl(217 91% 95%);
+  --muted-foreground: hsl(217 20% 45%);
+  --accent: hsl(38 92% 50%); /* School Gold #f59e0b */
+  --accent-foreground: hsl(217 32% 17%);
   --destructive: hsl(0 84% 60%);
   --destructive-foreground: hsl(0 0% 98%);
-  --border: hsl(215 20% 82%);
-  --input: hsl(215 20% 91%);
-  --ring: hsl(215 25% 27%);
-  --chart-1: hsl(217 91% 60%);
-  --chart-2: hsl(215 25% 27%);
-  --chart-3: hsl(197 87% 45%);
-  --chart-4: hsl(43 74% 49%);
-  --chart-5: hsl(27 87% 67%);
-  --sidebar: hsl(218 30% 26%); /* Updated to #242C43 for better branding */
+  --border: hsl(217 91% 85%);
+  --input: hsl(217 91% 97%);
+  --ring: hsl(217 91% 60%);
+  --chart-1: hsl(217 91% 60%); /* School Blue */
+  --chart-2: hsl(38 92% 50%); /* School Gold */
+  --chart-3: hsl(142 76% 36%); /* Complementary green */
+  --chart-4: hsl(271 91% 65%); /* Complementary purple */
+  --chart-5: hsl(12 76% 61%); /* Complementary orange-red */
+  
+  /* Enhanced focus styles for accessibility - WCAG 2.1 AA compliant */
+  --focus-ring-color: hsl(217 91% 50%);
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 2px;
+  --focus-ring-color-alt: hsl(38 92% 45%); /* Gold alternative for high contrast */
+  --sidebar: hsl(217 91% 60%); /* School Blue sidebar */
   --sidebar-foreground: hsl(0 0% 100%);
-  --sidebar-primary: hsl(217 91% 60%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(215 20% 35%);
+  --sidebar-primary: hsl(38 92% 50%); /* School Gold for active items */
+  --sidebar-primary-foreground: hsl(217 32% 17%);
+  --sidebar-accent: hsl(217 91% 55%);
   --sidebar-accent-foreground: hsl(0 0% 100%);
-  --sidebar-border: hsl(215 20% 35%);
-  --sidebar-ring: hsl(217 91% 60%);
+  --sidebar-border: hsl(217 91% 55%);
+  --sidebar-ring: hsl(38 92% 50%);
+  
+  /* School-Specific Color Palette for Professional Fundraising */
+  --school-blue-50: hsl(217 91% 97%);
+  --school-blue-100: hsl(217 91% 92%);
+  --school-blue-200: hsl(217 91% 85%);
+  --school-blue-300: hsl(217 91% 75%);
+  --school-blue-400: hsl(217 91% 65%);
+  --school-blue-500: hsl(217 91% 60%); /* Primary brand blue */
+  --school-blue-600: hsl(217 91% 55%);
+  --school-blue-700: hsl(217 91% 45%);
+  --school-blue-800: hsl(217 32% 25%);
+  --school-blue-900: hsl(217 32% 17%);
+  
+  --school-gold-50: hsl(38 92% 97%);
+  --school-gold-100: hsl(38 92% 92%);
+  --school-gold-200: hsl(38 92% 85%);
+  --school-gold-300: hsl(38 92% 70%);
+  --school-gold-400: hsl(38 92% 60%);
+  --school-gold-500: hsl(38 92% 50%); /* Primary brand gold */
+  --school-gold-600: hsl(38 92% 45%);
+  --school-gold-700: hsl(38 92% 35%);
+  --school-gold-800: hsl(38 92% 25%);
+  --school-gold-900: hsl(38 92% 15%);
+  
+  /* Professional Typography Scale */
   --font-sans: Inter, ui-sans-serif, system-ui;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
+  
+  /* Typography Sizes for School Platform */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
+  --text-4xl: 2.25rem;   /* 36px */
+  --text-5xl: 3rem;      /* 48px */
+  
+  /* School-Specific Typography Classes */
+  --school-small: var(--text-xs);
+  --school-body: var(--text-base);
+  --school-subheading: var(--text-lg);
+  --school-heading: var(--text-2xl);
+  --school-title: var(--text-3xl);
+  --school-display: var(--text-4xl);
+  
+  /* Enhanced Shadows for Professional Appearance */
+  --shadow-school: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-school-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-school-gold: 0 4px 6px -1px rgb(245 158 11 / 0.2), 0 2px 4px -2px rgb(245 158 11 / 0.1);
+  
+  /* Design System */
   --radius: 0.5rem;
   --spacing: 0.25rem;
 }
 
+/* Critical Fix: Select Components in Modals - Higher z-index than dialog overlay */
+[data-radix-select-content] {
+  z-index: 70 !important;
+}
+
+[data-radix-select-viewport] {
+  z-index: 70 !important;
+}
+
+[data-radix-popper-content-wrapper] {
+  z-index: 70 !important;
+}
+
+/* Ensure select portals are above dialog overlays */
+.radix-select-portal {
+  z-index: 70 !important;
+}
+
 .dark {
-  /* School in the Square Dark Mode - Enhanced Navy Theme */
-  --background: hsl(215 25% 15%);
+  /* School in the Square Dark Mode */
+  --background: hsl(217 32% 10%); /* Dark school blue background */
   --foreground: hsl(0 0% 98%);
-  --card: hsl(215 25% 18%);
+  --card: hsl(217 32% 12%); /* Slightly lighter dark blue for cards */
   --card-foreground: hsl(0 0% 98%);
-  --popover: hsl(215 25% 15%);
+  --popover: hsl(217 32% 10%);
   --popover-foreground: hsl(0 0% 98%);
-  --primary: hsl(217 91% 60%);
-  --primary-foreground: hsl(215 25% 15%);
-  --secondary: hsl(215 20% 25%);
+  --primary: hsl(217 91% 70%); /* Lighter school blue for dark mode */
+  --primary-foreground: hsl(217 32% 10%);
+  --secondary: hsl(217 32% 20%); /* Dark school blue variant */
   --secondary-foreground: hsl(0 0% 98%);
-  --muted: hsl(215 20% 25%);
-  --muted-foreground: hsl(215 15% 65%);
-  --accent: hsl(215 20% 25%);
-  --accent-foreground: hsl(0 0% 98%);
+  --muted: hsl(217 32% 20%);
+  --muted-foreground: hsl(217 20% 65%);
+  --accent: hsl(38 92% 60%); /* Brighter school gold for dark mode */
+  --accent-foreground: hsl(217 32% 10%);
   --destructive: hsl(0 62% 50%);
   --destructive-foreground: hsl(0 85% 97%);
-  --border: hsl(215 20% 25%);
-  --input: hsl(215 20% 25%);
-  --ring: hsl(217 91% 60%);
-  --chart-1: hsl(217 91% 60%);
-  --chart-2: hsl(215 25% 45%);
-  --chart-3: hsl(197 87% 55%);
-  --chart-4: hsl(43 74% 59%);
-  --chart-5: hsl(27 87% 77%);
-  --sidebar: hsl(218 30% 18%); /* Dark mode version of #242C43 */
+  --border: hsl(217 32% 20%);
+  --input: hsl(217 32% 15%);
+  --ring: hsl(217 91% 70%);
+  --chart-1: hsl(217 91% 70%); /* School Blue for dark mode */
+  --chart-2: hsl(38 92% 60%); /* School Gold for dark mode */
+  --chart-3: hsl(142 76% 46%); /* Complementary green */
+  --chart-4: hsl(271 91% 75%); /* Complementary purple */
+  --chart-5: hsl(12 76% 71%); /* Complementary orange-red */
+  --sidebar: hsl(217 32% 12%); /* Dark school blue sidebar */
   --sidebar-foreground: hsl(0 0% 98%);
-  --sidebar-primary: hsl(217 91% 60%);
-  --sidebar-primary-foreground: hsl(215 25% 12%);
-  --sidebar-accent: hsl(215 20% 20%);
+  --sidebar-primary: hsl(38 92% 60%); /* School Gold for active items */
+  --sidebar-primary-foreground: hsl(217 32% 10%);
+  --sidebar-accent: hsl(217 32% 15%);
   --sidebar-accent-foreground: hsl(0 0% 98%);
-  --sidebar-border: hsl(215 20% 20%);
-  --sidebar-ring: hsl(217 91% 60%);
+  --sidebar-border: hsl(217 32% 15%);
+  --sidebar-ring: hsl(38 92% 60%);
+  
+  /* Dark Mode School Color Adjustments */
+  --school-blue-50: hsl(217 32% 15%);
+  --school-blue-100: hsl(217 32% 18%);
+  --school-blue-200: hsl(217 32% 22%);
+  --school-blue-300: hsl(217 91% 40%);
+  --school-blue-400: hsl(217 91% 50%);
+  --school-blue-500: hsl(217 91% 70%);
+  --school-blue-600: hsl(217 91% 75%);
+  --school-blue-700: hsl(217 91% 80%);
+  --school-blue-800: hsl(217 91% 85%);
+  --school-blue-900: hsl(0 0% 98%);
+  
+  --school-gold-50: hsl(38 92% 15%);
+  --school-gold-100: hsl(38 92% 20%);
+  --school-gold-200: hsl(38 92% 25%);
+  --school-gold-300: hsl(38 92% 40%);
+  --school-gold-400: hsl(38 92% 50%);
+  --school-gold-500: hsl(38 92% 60%);
+  --school-gold-600: hsl(38 92% 70%);
+  --school-gold-700: hsl(38 92% 80%);
+  --school-gold-800: hsl(38 92% 85%);
+  --school-gold-900: hsl(38 92% 90%);
 }
 
 @layer base {
@@ -95,22 +193,78 @@
 }
 
 @layer components {
+  /* Enhanced Mobile-First Components */
   .metric-card {
-    @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-1;
+    @apply transition-all duration-300;
+  }
+  
+  /* Mobile-first hover states */
+  @media (hover: hover) {
+    .metric-card {
+      @apply hover:shadow-lg hover:-translate-y-2;
+    }
   }
   
   .chart-container {
-    @apply relative h-80;
+    @apply relative h-64 sm:h-80;
   }
   
   .table-scroll {
-    @apply max-h-96 overflow-y-auto;
+    @apply max-h-80 sm:max-h-96 overflow-y-auto;
   }
   
   .progress-bar {
     @apply transition-all duration-1000 ease-in-out;
   }
 
+  /* Touch-friendly interaction targets */
+  .touch-target {
+    @apply min-h-[48px] min-w-[48px] flex items-center justify-center;
+  }
+  
+  .mobile-card {
+    @apply p-4 sm:p-6 rounded-lg sm:rounded-xl;
+  }
+  
+  .mobile-grid {
+    @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  }
+  
+  .mobile-text {
+    @apply text-sm sm:text-base;
+  }
+  
+  .mobile-spacing {
+    @apply space-y-4 sm:space-y-6;
+  }
+  
+  .mobile-button {
+    @apply px-4 py-3 sm:px-6 sm:py-4 text-sm sm:text-base font-semibold rounded-lg transition-all duration-200;
+  }
+  
+  /* Touch-friendly interactions */
+  .touch-friendly {
+    @apply active:scale-95 transition-transform duration-100;
+  }
+  
+  /* Enhanced responsive typography */
+  .hero-title {
+    @apply text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold leading-tight;
+  }
+  
+  .hero-subtitle {
+    @apply text-lg sm:text-xl md:text-2xl;
+  }
+  
+  .section-title {
+    @apply text-2xl sm:text-3xl md:text-4xl font-bold;
+  }
+  
+  .card-title {
+    @apply text-lg sm:text-xl md:text-2xl font-semibold;
+  }
+
+  /* Sidebar responsive behavior */
   .sidebar-width {
     width: 320px;
   }
@@ -131,10 +285,129 @@
     .main-content-width {
       @apply ml-0;
     }
+    
+    /* Mobile-specific adjustments */
+    .chart-container {
+      @apply h-64;
+    }
+    
+    .mobile-card {
+      @apply p-4 rounded-lg;
+    }
+  }
+  
+  /* Tablet and small desktop optimizations */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .mobile-grid {
+      @apply grid-cols-2;
+    }
+    
+    .chart-container {
+      @apply h-72;
+    }
+  }
+  
+  /* Large screen optimizations */
+  @media (min-width: 1536px) {
+    .mobile-grid {
+      @apply grid-cols-4;
+    }
+    
+    .chart-container {
+      @apply h-96;
+    }
   }
 }
 
 @layer utilities {
+  /* Professional School Typography Classes */
+  .text-school-small {
+    font-size: var(--school-small);
+    line-height: 1.4;
+    font-weight: 400;
+  }
+  
+  .text-school-body {
+    font-size: var(--school-body);
+    line-height: 1.5;
+    font-weight: 400;
+  }
+  
+  .text-school-subheading {
+    font-size: var(--school-subheading);
+    line-height: 1.4;
+    font-weight: 600;
+  }
+  
+  .text-school-heading {
+    font-size: var(--school-heading);
+    line-height: 1.3;
+    font-weight: 700;
+  }
+  
+  .text-school-title {
+    font-size: var(--school-title);
+    line-height: 1.2;
+    font-weight: 700;
+  }
+  
+  .text-school-display {
+    font-size: var(--school-display);
+    line-height: 1.1;
+    font-weight: 800;
+  }
+  
+  /* School Brand Color Utilities */
+  .bg-school-blue-50 { background-color: hsl(var(--school-blue-50)); }
+  .bg-school-blue-100 { background-color: hsl(var(--school-blue-100)); }
+  .bg-school-blue-200 { background-color: hsl(var(--school-blue-200)); }
+  .bg-school-blue-300 { background-color: hsl(var(--school-blue-300)); }
+  .bg-school-blue-400 { background-color: hsl(var(--school-blue-400)); }
+  .bg-school-blue-500 { background-color: hsl(var(--school-blue-500)); }
+  .bg-school-blue-600 { background-color: hsl(var(--school-blue-600)); }
+  .bg-school-blue-700 { background-color: hsl(var(--school-blue-700)); }
+  .bg-school-blue-800 { background-color: hsl(var(--school-blue-800)); }
+  .bg-school-blue-900 { background-color: hsl(var(--school-blue-900)); }
+  
+  .text-school-blue-50 { color: hsl(var(--school-blue-50)); }
+  .text-school-blue-100 { color: hsl(var(--school-blue-100)); }
+  .text-school-blue-200 { color: hsl(var(--school-blue-200)); }
+  .text-school-blue-300 { color: hsl(var(--school-blue-300)); }
+  .text-school-blue-400 { color: hsl(var(--school-blue-400)); }
+  .text-school-blue-500 { color: hsl(var(--school-blue-500)); }
+  .text-school-blue-600 { color: hsl(var(--school-blue-600)); }
+  .text-school-blue-700 { color: hsl(var(--school-blue-700)); }
+  .text-school-blue-800 { color: hsl(var(--school-blue-800)); }
+  .text-school-blue-900 { color: hsl(var(--school-blue-900)); }
+  
+  .bg-school-gold-50 { background-color: hsl(var(--school-gold-50)); }
+  .bg-school-gold-100 { background-color: hsl(var(--school-gold-100)); }
+  .bg-school-gold-200 { background-color: hsl(var(--school-gold-200)); }
+  .bg-school-gold-300 { background-color: hsl(var(--school-gold-300)); }
+  .bg-school-gold-400 { background-color: hsl(var(--school-gold-400)); }
+  .bg-school-gold-500 { background-color: hsl(var(--school-gold-500)); }
+  .bg-school-gold-600 { background-color: hsl(var(--school-gold-600)); }
+  .bg-school-gold-700 { background-color: hsl(var(--school-gold-700)); }
+  .bg-school-gold-800 { background-color: hsl(var(--school-gold-800)); }
+  .bg-school-gold-900 { background-color: hsl(var(--school-gold-900)); }
+  
+  .text-school-gold-50 { color: hsl(var(--school-gold-50)); }
+  .text-school-gold-100 { color: hsl(var(--school-gold-100)); }
+  .text-school-gold-200 { color: hsl(var(--school-gold-200)); }
+  .text-school-gold-300 { color: hsl(var(--school-gold-300)); }
+  .text-school-gold-400 { color: hsl(var(--school-gold-400)); }
+  .text-school-gold-500 { color: hsl(var(--school-gold-500)); }
+  .text-school-gold-600 { color: hsl(var(--school-gold-600)); }
+  .text-school-gold-700 { color: hsl(var(--school-gold-700)); }
+  .text-school-gold-800 { color: hsl(var(--school-gold-800)); }
+  .text-school-gold-900 { color: hsl(var(--school-gold-900)); }
+  
+  /* Professional Shadow Utilities */
+  .shadow-school { box-shadow: var(--shadow-school); }
+  .shadow-school-lg { box-shadow: var(--shadow-school-lg); }
+  .shadow-school-gold { box-shadow: var(--shadow-school-gold); }
+  
+  /* Line Clamping */
   .line-clamp-1 {
     display: -webkit-box;
     -webkit-line-clamp: 1;
@@ -147,5 +420,176 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  /* Enhanced focus states for accessibility - WCAG 2.1 AA compliant */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+  }
+  
+  /* High contrast focus indicator for better accessibility */
+  .focus-ring-enhanced {
+    @apply focus:outline-none focus:ring-4 focus:ring-blue-600 focus:ring-offset-2 focus:ring-offset-background;
+  }
+  
+  /* Focus visible only when keyboard navigating */
+  .focus-visible-only {
+    outline: none;
+  }
+  
+  .focus-visible-only:focus-visible {
+    outline: 3px solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+  }
+  
+  /* Screen reader only content */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  
+  /* Show sr-only content when focused */
+  .sr-only:focus,
+  .sr-only:focus-within {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+  
+  /* Skip link styles */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: var(--focus-ring-color);
+    color: white;
+    padding: 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    z-index: 100;
+    transition: top 0.2s ease;
+  }
+  
+  .skip-link:focus {
+    top: 6px;
+  }
+  
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    :root {
+      --focus-ring-color: hsl(0 0% 0%);
+      --border: hsl(0 0% 30%);
+    }
+    
+    .dark {
+      --focus-ring-color: hsl(0 0% 100%);
+      --border: hsl(0 0% 70%);
+    }
+  }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  
+  /* School-specific utility classes */
+  .school-primary {
+    @apply bg-primary text-primary-foreground;
+  }
+  
+  .school-accent {
+    @apply bg-accent text-accent-foreground;
+  }
+  
+  .school-gradient {
+    @apply bg-gradient-to-r from-primary via-primary/95 to-primary/90;
+  }
+  
+  /* Animation utilities */
+  .animate-slide-up {
+    animation: slideUp 0.7s ease-out forwards;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out forwards;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  /* Mobile-specific utilities */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
   }
 }

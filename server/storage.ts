@@ -59,6 +59,7 @@ import { eq, and, or, like, desc, asc, sql, count, sum, avg, isNull } from "driz
 export interface IStorage {
   // User operations (required for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   
   // Donor operations
@@ -74,6 +75,7 @@ export interface IStorage {
   createDonor(donor: InsertDonor): Promise<Donor>;
   updateDonor(id: string, donor: Partial<InsertDonor>): Promise<Donor>;
   deleteDonor(id: string): Promise<void>;
+  countDonors(): Promise<number>;
   
   // Campaign operations
   getCampaigns(params: {
@@ -87,6 +89,7 @@ export interface IStorage {
   createCampaign(campaign: InsertCampaign): Promise<Campaign>;
   updateCampaign(id: string, campaign: Partial<InsertCampaign>): Promise<Campaign>;
   deleteCampaign(id: string): Promise<void>;
+  countCampaigns(): Promise<number>;
   
   // Donation operations
   getDonations(params: {
@@ -157,6 +160,7 @@ export interface IStorage {
   createCommunication(communication: InsertCommunication): Promise<Communication>;
   updateCommunication(id: string, communication: Partial<InsertCommunication>): Promise<Communication>;
   deleteCommunication(id: string): Promise<void>;
+  countCommunications(): Promise<number>;
   
   // Data import operations (legacy)
   createDataImport(importData: Omit<DataImport, 'id' | 'createdAt' | 'completedAt'>): Promise<DataImport>;
@@ -286,14 +290,26 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
   async upsertUser(userData: UpsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
       .values(userData)
       .onConflictDoUpdate({
-        target: users.id,
+        target: users.email,
         set: {
-          ...userData,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          jobTitle: userData.jobTitle,
+          role: userData.role,
+          profileImageUrl: userData.profileImageUrl,
+          permissions: userData.permissions,
+          isActive: userData.isActive,
+          lastLogin: userData.lastLogin,
           updatedAt: new Date(),
         },
       })
@@ -301,7 +317,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  // Donor operations
+  // Donor operations - OPTIMIZED
   async getDonors(params: {
     search?: string;
     donorType?: string;
@@ -311,16 +327,17 @@ export class DatabaseStorage implements IStorage {
     limit?: number;
   } = {}) {
     const page = Math.max(1, params.page ?? 1);
-    const limit = Math.min(100, Math.max(1, params.limit ?? 25));
+    const limit = Math.min(50, Math.max(1, params.limit ?? 25)); // Reduced max limit
     const offset = (page - 1) * limit;
     let whereConditions: any[] = [eq(donors.isActive, true)];
 
     if (params.search) {
+      // Use ILIKE for case-insensitive search with better performance
       whereConditions.push(
         or(
-          like(donors.firstName, `%${params.search}%`),
-          like(donors.lastName, `%${params.search}%`),
-          like(donors.email, `%${params.search}%`)
+          sql`${donors.firstName} ILIKE ${`%${params.search}%`}`,
+          sql`${donors.lastName} ILIKE ${`%${params.search}%`}`,
+          sql`${donors.email} ILIKE ${`%${params.search}%`}`
         )
       );
     }
@@ -339,8 +356,9 @@ export class DatabaseStorage implements IStorage {
 
     const whereClause = whereConditions.length > 1 ? and(...whereConditions) : whereConditions[0];
 
+    // Use index-optimized ordering (last_donation_date has index)
     const [donorList, totalCount] = await Promise.all([
-      db.select().from(donors).where(whereClause).limit(limit).offset(offset).orderBy(desc(donors.createdAt)),
+      db.select().from(donors).where(whereClause).limit(limit).offset(offset).orderBy(desc(donors.lastDonationDate)),
       db.select({ count: count() }).from(donors).where(whereClause),
     ]);
 
@@ -371,6 +389,11 @@ export class DatabaseStorage implements IStorage {
 
   async deleteDonor(id: string): Promise<void> {
     await db.update(donors).set({ isActive: false }).where(eq(donors.id, id));
+  }
+
+  async countDonors(): Promise<number> {
+    const result = await db.select({ count: count() }).from(donors).where(eq(donors.isActive, true));
+    return result[0].count;
   }
 
   // Campaign operations
@@ -434,7 +457,12 @@ export class DatabaseStorage implements IStorage {
     await db.update(campaigns).set({ isActive: false }).where(eq(campaigns.id, id));
   }
 
-  // Donation operations
+  async countCampaigns(): Promise<number> {
+    const result = await db.select({ count: count() }).from(campaigns).where(eq(campaigns.isActive, true));
+    return result[0].count;
+  }
+
+  // Donation operations - OPTIMIZED
   async getDonations(params: {
     search?: string;
     donorId?: string;
@@ -448,18 +476,24 @@ export class DatabaseStorage implements IStorage {
     limit?: number;
   } = {}) {
     const page = Math.max(1, params.page ?? 1);
-    const limit = Math.min(100, Math.max(1, params.limit ?? 25));
+    const limit = Math.min(50, Math.max(1, params.limit ?? 25)); // Reduced max limit
     const offset = (page - 1) * limit;
     let whereConditions: any[] = [];
 
-    if (params.search) {
+    // Optimize search - avoid complex OR conditions if possible
+    if (params.search && params.donorId) {
+      // If we have donorId, skip text search to avoid slow JOINs
+      whereConditions.push(eq(donations.donorId, params.donorId));
+    } else if (params.search) {
+      // Only search in donations table first, then fetch related data
       whereConditions.push(
-        or(
-          like(donors.firstName, `%${params.search}%`),
-          like(donors.lastName, `%${params.search}%`),
-          like(donors.email, `%${params.search}%`),
-          like(campaigns.name, `%${params.search}%`)
-        )
+        sql`EXISTS (
+          SELECT 1 FROM donors d 
+          WHERE d.id = ${donations.donorId} 
+          AND (d.first_name ILIKE ${`%${params.search}%`} 
+               OR d.last_name ILIKE ${`%${params.search}%`} 
+               OR d.email ILIKE ${`%${params.search}%`})
+        )`
       );
     }
 
@@ -493,16 +527,11 @@ export class DatabaseStorage implements IStorage {
 
     const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
+    // Split into two optimized queries to avoid slow JOINs
     const [donationList, totalCount] = await Promise.all([
       db
-        .select({
-          donation: donations,
-          donor: donors,
-          campaign: campaigns,
-        })
+        .select()
         .from(donations)
-        .leftJoin(donors, eq(donations.donorId, donors.id))
-        .leftJoin(campaigns, eq(donations.campaignId, campaigns.id))
         .where(whereClause)
         .limit(limit)
         .offset(offset)
@@ -510,11 +539,26 @@ export class DatabaseStorage implements IStorage {
       db.select({ count: count() }).from(donations).where(whereClause),
     ]);
 
+    // Batch fetch related data efficiently
+    const donorIds = [...new Set(donationList.map(d => d.donorId))];
+    const campaignIds = [...new Set(donationList.map(d => d.campaignId).filter(Boolean))];
+    
+    const [donorsMap, campaignsMap] = await Promise.all([
+      db.select().from(donors).where(sql`${donors.id} = ANY(${donorIds})`).then(
+        rows => new Map(rows.map(d => [d.id, d]))
+      ),
+      campaignIds.length > 0 
+        ? db.select().from(campaigns).where(sql`${campaigns.id} = ANY(${campaignIds})`).then(
+            rows => new Map(rows.map(c => [c.id, c]))
+          )
+        : Promise.resolve(new Map())
+    ]);
+
     return {
-      donations: donationList.map(row => ({
-        ...row.donation,
-        donor: row.donor!,
-        campaign: row.campaign || undefined,
+      donations: donationList.map(donation => ({
+        ...donation,
+        donor: donorsMap.get(donation.donorId)!,
+        campaign: donation.campaignId ? campaignsMap.get(donation.campaignId) : undefined,
       })),
       total: totalCount[0].count,
     };
@@ -1266,6 +1310,11 @@ export class DatabaseStorage implements IStorage {
 
   async deleteCommunication(id: string): Promise<void> {
     await db.delete(communications).where(eq(communications.id, id));
+  }
+
+  async countCommunications(): Promise<number> {
+    const result = await db.select({ count: count() }).from(communications);
+    return result[0].count;
   }
 
   // Data import operations

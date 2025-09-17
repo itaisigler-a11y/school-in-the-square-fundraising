@@ -60,7 +60,7 @@ export const grantStatusEnum = pgEnum('grant_status', ['prospect', 'applied', 'u
 export const grantTypeEnum = pgEnum('grant_type', ['foundation', 'government', 'corporate', 'individual', 'crowdfunding']);
 export const importJobStatusEnum = pgEnum('import_job_status', ['pending', 'processing', 'validating', 'importing', 'completed', 'failed', 'cancelled']);
 export const templateTypeEnum = pgEnum('template_type', ['email', 'sms', 'letter', 'receipt', 'thank_you', 'newsletter']);
-export const auditActionTypeEnum = pgEnum('audit_action_type', ['create', 'update', 'delete', 'login', 'logout', 'export', 'import', 'view', 'import_started', 'import_completed', 'import_failed', 'import_cancelled', 'ai_donation_appeal', 'ai_subject_lines', 'ai_grant_outline', 'ai_content_generation']);
+export const auditActionTypeEnum = pgEnum('audit_action_type', ['create', 'update', 'delete', 'login', 'logout', 'export', 'import', 'view', 'api_access', 'import_started', 'import_completed', 'import_failed', 'import_cancelled', 'ai_donation_appeal', 'ai_subject_lines', 'ai_grant_outline', 'ai_content_generation']);
 
 // Donors table
 export const donors = pgTable("donors", {
@@ -922,7 +922,12 @@ export const segmentRuleSchema = z.object({
   valueType: z.enum(['string', 'number', 'boolean', 'date', 'array']).optional(),
 });
 
-export const segmentGroupSchema = z.object({
+export const segmentGroupSchema: z.ZodType<{
+  id: string;
+  combinator: 'and' | 'or';
+  rules: (z.infer<typeof segmentRuleSchema> | z.infer<typeof segmentGroupSchema>)[];
+  not?: boolean;
+}> = z.object({
   id: z.string(),
   combinator: z.enum(['and', 'or']),
   rules: z.array(z.lazy(() => z.union([segmentRuleSchema, segmentGroupSchema]))),

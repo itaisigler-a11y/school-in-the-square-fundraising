@@ -16,10 +16,11 @@ interface RateLimitConfig {
   maxTokensPerRequest: number;
 }
 
+// EMERGENCY: Reduced rate limits to improve stability
 const DEFAULT_RATE_LIMITS: RateLimitConfig = {
-  maxRequestsPerMinute: 10,
-  maxRequestsPerHour: 100,
-  maxTokensPerRequest: 4000,
+  maxRequestsPerMinute: 5, // Reduced from 10
+  maxRequestsPerHour: 50,  // Reduced from 100
+  maxTokensPerRequest: 3000, // Reduced from 4000
 };
 
 // Request tracking for rate limiting
@@ -42,6 +43,41 @@ class AIService {
       });
     }
     this.rateLimits = rateLimits;
+  }
+
+  // Emergency retry logic with exponential backoff
+  private async retryWithBackoff<T>(
+    operation: () => Promise<T>,
+    maxRetries: number = 3,
+    baseDelay: number = 1000
+  ): Promise<T> {
+    let lastError: Error;
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await operation();
+      } catch (error: any) {
+        lastError = error;
+        
+        // Don't retry on rate limit errors - respect limits
+        if (error.message?.includes('rate limit') || error.status === 429) {
+          throw error;
+        }
+        
+        // Don't retry on auth errors
+        if (error.status === 401 || error.status === 403) {
+          throw error;
+        }
+        
+        if (attempt < maxRetries) {
+          const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 1000;
+          console.log(`🔄 OpenAI API retry ${attempt + 1}/${maxRetries} after ${delay}ms. Error: ${error.message}`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+    }
+    
+    throw new Error(`OpenAI API failed after ${maxRetries + 1} attempts: ${lastError.message}`);
   }
 
   // Rate limiting check
@@ -241,16 +277,20 @@ Generate appeals that:
 4. Maintain ${tone} tone throughout
 5. Include compelling subject lines for email outreach`;
 
-      const response = await this.openai.chat.completions.create({
-        model: "gpt-5",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        response_format: { type: "json_object" },
-        max_tokens: this.rateLimits.maxTokensPerRequest,
-        temperature: 0.7,
-      });
+      // EMERGENCY: Add proper retry logic and error handling for OpenAI API
+      const response = await this.retryWithBackoff(async () => {
+        return await this.openai.chat.completions.create({
+          model: "gpt-4", // Fallback to more stable model during crisis
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt }
+          ],
+          response_format: { type: "json_object" },
+          max_tokens: Math.min(this.rateLimits.maxTokensPerRequest, 3000), // Reduced to improve reliability
+          temperature: 0.7,
+          timeout: 30000, // 30 second timeout
+        });
+      }, 3);
 
       const result = JSON.parse(response.choices[0].message.content || '{}');
       

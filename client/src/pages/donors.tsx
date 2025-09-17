@@ -35,6 +35,11 @@ export default function Donors() {
       page, 
       limit: 25 
     }],
+    staleTime: 30000, // Cache for 30 seconds
+    refetchInterval: false,
+    refetchOnWindowFocus: false,
+    // Optimize for memory by limiting cache size - using gcTime for TanStack Query v5
+    gcTime: 60000, // Keep in cache for 1 minute only
   });
 
   // Delete donor mutation

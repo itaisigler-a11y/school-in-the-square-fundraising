@@ -39,7 +39,7 @@ export function ProtectedRoute({
           <div className="min-h-screen flex items-center justify-center bg-background">
             <div className="text-center space-y-4">
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-muted-foreground">Checking permissions...</p>
+              <p className="text-muted-foreground">Setting up your fundraising platform...</p>
             </div>
           </div>
         )}
@@ -47,10 +47,20 @@ export function ProtectedRoute({
     );
   }
 
-  // Redirect to login if not authenticated
+  // For single-user mode, show loading while auto-authentication happens
   if (!auth.isAuthenticated) {
-    window.location.href = '/api/login';
-    return null;
+    return (
+      <>
+        {loading || (
+          <div className="min-h-screen flex items-center justify-center bg-background">
+            <div className="text-center space-y-4">
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+              <p className="text-muted-foreground">Initializing School in the Square fundraising platform...</p>
+            </div>
+          </div>
+        )}
+      </>
+    );
   }
 
   // Check role requirements

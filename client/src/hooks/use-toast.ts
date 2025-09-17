@@ -6,7 +6,7 @@ import type {
 } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_REMOVE_DELAY = 5000
 
 type ToasterToast = ToastProps & {
   id: string
@@ -178,8 +178,11 @@ function useToast() {
       if (index > -1) {
         listeners.splice(index, 1)
       }
+      // Clean up any pending timeouts when component unmounts
+      toastTimeouts.forEach((timeout) => clearTimeout(timeout))
+      toastTimeouts.clear()
     }
-  }, [state])
+  }, [])
 
   return {
     ...state,

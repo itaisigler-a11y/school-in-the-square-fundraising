@@ -294,7 +294,7 @@ Principal Sarah Johnson`
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Type</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={field.onChange} value={field.value || ""}>
                             <FormControl>
                               <SelectTrigger data-testid="select-template-type">
                                 <SelectValue placeholder="Select type" />

@@ -421,7 +421,7 @@ export default function Segments() {
                 Browse Templates
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full sm:w-3/4 lg:w-1/2">
+            <SheetContent side="right">
               <SheetHeader>
                 <SheetTitle>Smart Segment Templates</SheetTitle>
               </SheetHeader>
@@ -442,7 +442,7 @@ export default function Segments() {
                 Create Segment
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-6xl max-h-[90vh]">
+            <DialogContent className="max-w-4xl">
               <DialogHeader>
                 <DialogTitle>
                   {selectedTemplate ? `Create from Template: ${selectedTemplate.name}` : 'Create New Segment'}
@@ -559,7 +559,7 @@ export default function Segments() {
                         Browse Templates
                       </Button>
                     </SheetTrigger>
-                    <SheetContent side="right" className="w-full sm:w-3/4 lg:w-1/2">
+                    <SheetContent side="right">
                       <SheetHeader>
                         <SheetTitle>Smart Segment Templates</SheetTitle>
                       </SheetHeader>
@@ -743,7 +743,7 @@ export default function Segments() {
 
       {/* Edit Dialog */}
       <Dialog open={!!editingSegment} onOpenChange={() => setEditingSegment(null)}>
-        <DialogContent className="max-w-6xl max-h-[90vh]">
+        <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle>Edit Segment: {editingSegment?.name}</DialogTitle>
           </DialogHeader>
@@ -761,7 +761,7 @@ export default function Segments() {
 
       {/* Create Campaign Dialog */}
       <Dialog open={isCampaignCreateOpen} onOpenChange={setIsCampaignCreateOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh]">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Create Campaign for Segment: {selectedSegmentForCampaign?.name}</DialogTitle>
           </DialogHeader>

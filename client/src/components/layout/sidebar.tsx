@@ -1,20 +1,81 @@
 import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
-import { useUIMode } from "@/lib/ui-mode-context";
-import { NAVIGATION_PERMISSIONS } from "@shared/permissions";
+import { isDesktopDevice } from "@/lib/navigation-utils";
+import { PERMISSIONS } from "@shared/permissions";
 import logoUrl from "@assets/image_1758026275177.png";
+
+// Simplified navigation configuration
+const NAVIGATION_ITEMS = [
+  {
+    id: 'dashboard',
+    label: 'Dashboard',
+    icon: 'fas fa-tachometer-alt',
+    path: '/',
+    description: 'Your fundraising overview'
+  },
+  {
+    id: 'donors',
+    label: 'Donors',
+    icon: 'fas fa-users',
+    path: '/donors',
+    permissions: [PERMISSIONS.DONORS_VIEW],
+    description: 'Manage donor relationships'
+  },
+  {
+    id: 'campaigns',
+    label: 'Campaigns',
+    icon: 'fas fa-bullhorn',
+    path: '/campaigns',
+    permissions: [PERMISSIONS.CAMPAIGNS_VIEW],
+    description: 'Create and track campaigns'
+  },
+  {
+    id: 'communications',
+    label: 'Communications',
+    icon: 'fas fa-envelope',
+    path: '/communications',
+    permissions: [PERMISSIONS.COMMUNICATIONS_VIEW],
+    description: 'Email and outreach'
+  },
+  {
+    id: 'analytics',
+    label: 'Analytics',
+    icon: 'fas fa-chart-bar',
+    path: '/analytics',
+    permissions: [PERMISSIONS.ANALYTICS_VIEW],
+    description: 'Performance insights'
+  },
+  {
+    id: 'segments',
+    label: 'Segments',
+    icon: 'fas fa-layer-group',
+    path: '/segments',
+    permissions: [PERMISSIONS.DONORS_VIEW],
+    description: 'Organize donor groups'
+  },
+  {
+    id: 'import',
+    label: 'Import Data',
+    icon: 'fas fa-upload',
+    path: '/import',
+    permissions: [PERMISSIONS.DATA_IMPORT],
+    description: 'Import from files'
+  }
+];
 
 export function Sidebar() {
   const [location] = useLocation();
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(() => {
     return localStorage.getItem('sidebar-collapsed') === 'true';
   });
+  
   const auth = useAuth();
-  const { isSimpleMode } = useUIMode();
 
   const toggleCollapsed = () => {
     const newCollapsed = !isCollapsed;
@@ -22,185 +83,161 @@ export function Sidebar() {
     localStorage.setItem('sidebar-collapsed', newCollapsed.toString());
   };
 
-  // Close mobile sidebar when route changes
-  useEffect(() => {
-    setIsMobileOpen(false);
-  }, [location]);
+  // Filter navigation items based on permissions
+  const visibleNavigationItems = NAVIGATION_ITEMS.filter(item => 
+    !item.permissions || auth.hasAnyPermission(item.permissions)
+  );
 
-  const allNavigationItems = [
-    { name: "Dashboard", href: "/", icon: "fas fa-tachometer-alt" },
-    { name: "Donors", href: "/donors", icon: "fas fa-users" },
-    { name: "Segments", href: "/segments", icon: "fas fa-layer-group" },
-    { name: "Campaigns", href: "/campaigns", icon: "fas fa-bullhorn" },
-    { name: "Communications", href: "/communications", icon: "fas fa-envelope" },
-    { name: "Analytics", href: "/analytics", icon: "fas fa-chart-bar" },
-    { name: "Import Data", href: "/import", icon: "fas fa-upload" },
-  ];
-
-  // Define which items are available in Simple Mode
-  const simpleNavItems = ["/", "/donors", "/import", "/segments"];
-  
-  // Filter navigation items based on user permissions and UI mode
-  const navigation = allNavigationItems.filter(item => {
-    const hasPermission = auth.isAuthenticated && auth.canAccessRoute(item.href);
-    const isAvailableInMode = isSimpleMode ? simpleNavItems.includes(item.href) : true;
-    return hasPermission && isAvailableInMode;
-  });
-
-  const allSettingsItems = [
-    { name: "User Management", href: "/settings/users", icon: "fas fa-user-shield" },
-    { name: "System Settings", href: "/settings", icon: "fas fa-cog" },
-  ];
-
-  // Filter settings items based on user permissions and UI mode (settings only in advanced mode)
-  const settings = allSettingsItems.filter(item => {
-    const hasPermission = auth.isAuthenticated && auth.canAccessRoute(item.href);
-    return hasPermission && !isSimpleMode; // Hide settings in Simple Mode
-  });
+  // Don't render on mobile (mobile drawer handles mobile navigation)
+  if (!isDesktopDevice()) return null;
 
   return (
-    <>
-      {/* Mobile overlay */}
-      {isMobileOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setIsMobileOpen(false)}
-        />
+    <aside 
+      id="navigation"
+      className={cn(
+        "bg-school-blue-500 border-r border-school-blue-400 h-screen fixed left-0 top-0 z-30 transition-all duration-300",
+        "lg:relative lg:translate-x-0",
+        isCollapsed ? "w-20" : "w-80"
       )}
-
-      {/* Mobile toggle button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        className="lg:hidden fixed top-4 left-4 z-50"
-        onClick={() => setIsMobileOpen(!isMobileOpen)}
-        data-testid="button-toggle-sidebar"
-      >
-        <i className="fas fa-bars"></i>
-      </Button>
-
-      {/* Sidebar */}
-      <aside 
-        className={cn(
-          "bg-sidebar border-r border-sidebar-border h-screen fixed left-0 top-0 z-50 transition-all duration-300",
-          "lg:relative lg:translate-x-0",
-          isCollapsed && !isMobileOpen ? "w-20" : "w-80",
-          isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        )}
-        data-testid="sidebar"
-      >
-        <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="p-6 border-b border-sidebar-border">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center justify-center transition-all duration-300">
-                <div className="w-12 h-12 flex items-center justify-center">
-                  <img 
-                    src={logoUrl} 
-                    alt="School in the Square Logo" 
-                    className="w-full h-full object-contain"
-                  />
+      data-testid="sidebar"
+      role="navigation"
+      aria-label="Main navigation"
+    >
+      <div className="flex flex-col h-full">
+        {/* Header - Enhanced Logo and Branding */}
+        <div className="p-6 border-b border-school-blue-400/20">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 transition-all duration-300">
+              {/* Significantly Larger Logo for Better Branding */}
+              <div className={cn(
+                "flex items-center justify-center bg-white rounded-xl shadow-school-lg border-2 border-school-gold-200 transition-all duration-300",
+                isCollapsed ? "w-12 h-12" : "w-20 h-20"
+              )}>
+                <img 
+                  src={logoUrl} 
+                  alt="School in the Square Logo" 
+                  className="w-full h-full object-contain p-1"
+                />
+              </div>
+              {!isCollapsed && (
+                <div className="flex flex-col">
+                  <h3 className="text-school-heading font-bold text-white leading-tight">School in the Square</h3>
+                  <p className="text-school-body text-school-blue-200 font-medium">Fundraising Platform</p>
                 </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleCollapsed}
-                className="text-sidebar-foreground hover:bg-sidebar-accent hidden lg:flex"
-                data-testid="button-toggle-collapse"
-              >
-                <i className={`fas ${isCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'}`}></i>
-              </Button>
+              )}
             </div>
-            
-            {/* Close button for mobile */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="lg:hidden absolute top-4 right-4"
-              onClick={() => setIsMobileOpen(false)}
-              data-testid="button-close-sidebar"
-            >
-              <i className="fas fa-times"></i>
-            </Button>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-2">
-            {navigation.map((item) => (
-              <Link 
-                key={item.href} 
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
-                  location === item.href
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                )}
-                data-testid={`nav-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
-              >
-                <i className={`${item.icon} w-5`}></i>
-                {!isCollapsed && <span>{item.name}</span>}
-              </Link>
-            ))}
-            
-            {/* Show settings section only when there are settings items (Advanced Mode) */}
-            {settings.length > 0 && (
-              <div className="pt-4 border-t border-border">
-                <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                  Settings
-                </p>
-                {settings.map((item) => (
-                  <Link 
-                    key={item.href} 
-                    href={item.href}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
-                      location === item.href
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                    )}
-                    data-testid={`nav-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
-                  >
-                    <i className={`${item.icon} w-5`}></i>
-                    <span>{item.name}</span>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </nav>
-
-          {/* User Profile - Clean minimal logout */}
-          <div className="p-4 border-t border-border">
-            {isCollapsed ? (
-              <div className="flex justify-center">
-                <Button 
-                  variant="ghost" 
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
                   size="sm"
-                  onClick={auth.logout}
-                  data-testid="button-logout"
-                  className="text-sidebar-foreground hover:bg-sidebar-accent"
+                  onClick={toggleCollapsed}
+                  className="text-white hover:bg-school-blue-400/30 hidden lg:flex rounded-lg"
+                  data-testid="button-toggle-collapse"
+                  aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                 >
-                  <i className="fas fa-sign-out-alt"></i>
+                  <i className={`fas ${isCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'}`} />
                 </Button>
-              </div>
-            ) : (
-              <div className="flex justify-center">
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={auth.logout}
-                  data-testid="button-logout"
-                  className="text-sidebar-foreground hover:bg-sidebar-accent flex items-center gap-2"
-                >
-                  <i className="fas fa-sign-out-alt"></i>
-                  <span>Sign Out</span>
-                </Button>
-              </div>
-            )}
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                {isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
-      </aside>
-    </>
+
+        {/* Navigation */}
+        <ScrollArea className="flex-1">
+          <nav className="p-4 space-y-2" role="navigation">
+            {visibleNavigationItems.map((item) => {
+              const isActive = item.path === '/' ? location === '/' : location.startsWith(item.path);
+              
+              return (
+                <Tooltip key={item.id}>
+                  <TooltipTrigger asChild>
+                    <Link
+                      href={item.path}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 font-medium",
+                        "min-h-[48px] focus:outline-none focus:ring-2 focus:ring-school-gold-500 focus:ring-offset-2 focus:ring-offset-school-blue-500",
+                        isActive
+                          ? "bg-school-gold-500 text-school-blue-900 shadow-school-gold"
+                          : "text-school-blue-100 hover:text-white hover:bg-school-blue-400/30"
+                      )}
+                      data-testid={`nav-${item.id}`}
+                      aria-label={`${item.label}${isActive ? ' (current page)' : ''}`}
+                    >
+                      <div className="relative">
+                        <i className={`${item.icon} w-5 h-5`} />
+                      </div>
+                      {!isCollapsed && <span className="text-school-body font-medium">{item.label}</span>}
+                    </Link>
+                  </TooltipTrigger>
+                  {(isCollapsed || item.description) && (
+                    <TooltipContent side="right" className="max-w-xs">
+                      {isCollapsed ? item.label : item.description}
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              );
+            })}
+          </nav>
+        </ScrollArea>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-school-blue-400/20 space-y-3">
+          {/* User & Sign Out */}
+          {isCollapsed ? (
+            <div className="flex flex-col items-center gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={auth.logout}
+                    data-testid="button-logout"
+                    className="text-school-blue-200 hover:text-white hover:bg-school-blue-400/30 rounded-lg"
+                    aria-label="Sign out"
+                  >
+                    <i className="fas fa-sign-out-alt" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  Sign Out
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-school-blue-400/30 rounded-lg flex items-center justify-center">
+                  <span className="text-school-small font-semibold text-white">
+                    {auth.getUserDisplayName().split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-school-body font-semibold text-white truncate">
+                    {auth.getUserDisplayName() || 'User'}
+                  </p>
+                  <p className="text-school-small text-school-blue-300 truncate">
+                    {auth.user?.jobTitle || auth.getRoleDisplayName()}
+                  </p>
+                </div>
+              </div>
+              
+              <Button
+                variant="ghost"
+                onClick={auth.logout}
+                className="w-full justify-start text-school-blue-200 hover:text-white hover:bg-school-blue-400/30"
+                data-testid="button-logout"
+              >
+                <i className="fas fa-sign-out-alt mr-3" />
+                Sign Out
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    </aside>
   );
 }

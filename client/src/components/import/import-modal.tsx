@@ -39,10 +39,12 @@ interface AIAnalysisResult {
 
 export function ImportModal({ open, onOpenChange, onSuccess }: ImportModalProps) {
   const { toast } = useToast();
-  const [step, setStep] = useState<'upload' | 'ai-analyzing' | 'ai-preview' | 'importing'>('upload');
+  const [step, setStep] = useState<'upload' | 'ai-analyzing' | 'ai-preview' | 'mapping' | 'validation' | 'importing'>('upload');
   const [filePreview, setFilePreview] = useState<FilePreview | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysisResult | null>(null);
+  const [fieldMapping, setFieldMapping] = useState<Record<string, string>>({});
+  const [validationResults, setValidationResults] = useState<any>(null);
   const [options, setOptions] = useState({
     skipDuplicates: true,
     sendWelcomeEmail: false,
@@ -704,7 +706,7 @@ export function ImportModal({ open, onOpenChange, onSuccess }: ImportModalProps)
           </div>
         )}
 
-        {step === 'preview' && filePreview && (
+        {step === 'mapping' && filePreview && (
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold mb-2">File Preview</h3>

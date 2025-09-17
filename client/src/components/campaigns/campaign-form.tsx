@@ -44,10 +44,14 @@ export function CampaignForm({ onSuccess, campaign, isEditing = false, preselect
     queryKey: ["/api/segment-definitions"],
   });
 
-  // Fetch sample donors for AI generation context
+  // Fetch sample donors for AI generation context  
   const { data: donorsData } = useQuery({
     queryKey: ["/api/donors", { limit: 5 }],
   });
+
+  // Type-safe access to query data
+  const segments = Array.isArray(segmentsData) ? segmentsData : [];
+  const donors = Array.isArray(donorsData) ? donorsData : [];
 
   const form = useForm<InsertCampaign>({
     resolver: zodResolver(insertCampaignSchema),
@@ -190,7 +194,7 @@ export function CampaignForm({ onSuccess, campaign, isEditing = false, preselect
   const generateDonorAppeals = async () => {
     const formData = form.getValues();
     
-    if (!donorsData?.donors?.length) {
+    if (!donors.length) {
       toast({
         title: "No Donor Data",
         description: "Need donor data to generate personalized appeals.",
@@ -203,7 +207,7 @@ export function CampaignForm({ onSuccess, campaign, isEditing = false, preselect
       setAiGeneration({ isGenerating: true, type: 'appeals', results: null });
       
       // Generate appeals for a sample donor
-      const sampleDonor = donorsData.donors[0];
+      const sampleDonor = donors[0];
       const response = await apiRequest('POST', '/api/ai/donation-appeal', {
         donorId: sampleDonor.id,
         tone: 'warm',
@@ -345,7 +349,7 @@ export function CampaignForm({ onSuccess, campaign, isEditing = false, preselect
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Campaign Type *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value || ""}>
                       <FormControl>
                         <SelectTrigger data-testid="select-campaign-type-form">
                           <SelectValue placeholder="Select type" />
@@ -370,7 +374,7 @@ export function CampaignForm({ onSuccess, campaign, isEditing = false, preselect
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value || ""}>
                       <FormControl>
                         <SelectTrigger data-testid="select-campaign-status-form">
                           <SelectValue placeholder="Select status" />
@@ -470,7 +474,7 @@ export function CampaignForm({ onSuccess, campaign, isEditing = false, preselect
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="all">All Donors</SelectItem>
-                      {segmentsData?.segmentDefinitions?.map((segment: any) => (
+                      {segments.map((segment: any) => (
                         <SelectItem key={segment.id} value={segment.id}>
                           <div className="flex items-center justify-between w-full">
                             <span>{segment.name}</span>
@@ -517,7 +521,7 @@ export function CampaignForm({ onSuccess, campaign, isEditing = false, preselect
                   type="button"
                   variant="outline"
                   onClick={generateDonorAppeals}
-                  disabled={aiGeneration.isGenerating || !donorsData?.donors?.length}
+                  disabled={aiGeneration.isGenerating || !donors.length}
                   className="w-full"
                   data-testid="button-generate-appeals"
                 >
@@ -579,7 +583,7 @@ export function CampaignForm({ onSuccess, campaign, isEditing = false, preselect
                   </div>
                 )}
 
-                {!donorsData?.donors?.length && (
+                {!donors.length && (
                   <div className="text-center py-4 text-muted-foreground">
                     <AlertCircle className="h-6 w-6 mx-auto mb-2" />
                     <p className="text-sm">Need donor data to generate personalized appeals</p>

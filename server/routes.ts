@@ -1,7 +1,38 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+// Simple auth mode - import simplified authentication
+import { setupSimpleAuth, isSimpleAuthenticated } from "./simpleAuth";
+
+// Memory optimization: Enable compression and caching
+import compression from "compression";
+
+// Emergency memory monitoring and cleanup
+let requestCount = 0;
+let errorCount = 0;
+let lastCleanup = Date.now();
+
+// More aggressive cleanup for emergency situation
+setInterval(() => {
+  const now = Date.now();
+  
+  // Force garbage collection more frequently during high memory usage
+  if (requestCount > 500 || errorCount > 10 || (now - lastCleanup > 30000)) {
+    if (global.gc) {
+      console.log(`🚨 Emergency garbage collection (requests: ${requestCount}, errors: ${errorCount})`);
+      global.gc();
+    }
+    requestCount = 0;
+    errorCount = 0;
+    lastCleanup = now;
+  }
+}, 30000); // Check every 30 seconds instead of 60
+
+// Track errors to trigger cleanup
+function trackError() {
+  errorCount++;
+}
+// Simple auth middleware for single-user mode
 import { 
   requireAuth,
   requireRole,
@@ -15,7 +46,8 @@ import {
   requireCampaignEdit,
   requireFinancialAccess,
   requireAnalyticsAccess
-} from "./auth-middleware";
+} from "./simple-auth-middleware";
+import { createHealthEndpoints } from "./health-check-service";
 import { 
   insertDonorSchema, 
   insertCampaignSchema, 
@@ -127,8 +159,21 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   console.log('🚀 Starting route registration...');
   
-  // Auth middleware
-  await setupAuth(app);
+  // Health check endpoints (before auth - public endpoints)
+  const healthEndpoints = createHealthEndpoints();
+  
+  // Core Kubernetes health check endpoints (no auth required)
+  registerRoute(app, 'get', '/healthz', healthEndpoints.health);
+  registerRoute(app, 'get', '/readyz', healthEndpoints.ready);
+  registerRoute(app, 'get', '/livez', healthEndpoints.live);
+  
+  // Legacy health endpoint for backwards compatibility
+  registerRoute(app, 'get', '/api/health', healthEndpoints.health);
+  
+  console.log('✅ Health check endpoints registered: /healthz, /readyz, /livez, /api/health');
+  
+  // Simple auth middleware - single user mode
+  await setupSimpleAuth(app);
 
   // Debug routes (admin only)
   registerRoute(app, 'get', '/api/debug/routes', requireAuth, requireAdmin, async (req, res) => {
@@ -247,6 +292,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error("Error fetching communications:", error);
       res.status(500).json({ message: "Failed to fetch communications" });
+    }
+  });
+
+  // Count endpoint MUST be before parameterized routes
+  registerRoute(app, 'get', '/api/communications/count', requireAuth, requirePermission('communications:view'), async (req, res) => {
+    try {
+      const count = await storage.countCommunications();
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching communication count:", error);
+      res.status(500).json({ message: "Failed to fetch communication count" });
     }
   });
 
@@ -558,6 +614,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching cohort analysis:", error);
       res.status(500).json({ message: "Failed to fetch cohort analysis" });
+    }
+  });
+
+  // COUNT ENDPOINTS - MUST BE BEFORE PARAMETERIZED ROUTES
+  registerRoute(app, 'get', '/api/donors/count', requireAuth, requireDonorAccess, async (req, res) => {
+    try {
+      const count = await storage.countDonors();
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching donor count:", error);
+      res.status(500).json({ message: "Failed to fetch donor count" });
+    }
+  });
+
+  registerRoute(app, 'get', '/api/campaigns/count', requireAuth, requireCampaignAccess, async (req, res) => {
+    try {
+      const count = await storage.countCampaigns();
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching campaign count:", error);
+      res.status(500).json({ message: "Failed to fetch campaign count" });
     }
   });
 

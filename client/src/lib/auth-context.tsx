@@ -70,9 +70,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     refetch
   } = useQuery({
     queryKey: ['/api/auth/user'],
-    retry: false,
+    retry: 3, // Retry up to 3 times for simplified auth auto-creation
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
+    // For single-user mode, always try to fetch user data
+    enabled: true,
   });
 
   // Update user state when query data changes
@@ -134,8 +136,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return user.email || '';
   };
 
-  // Profile completion detection
-  const needsProfileCompletion = !!user && (!user.firstName || !user.lastName || !user.jobTitle);
+  // Profile completion detection - DISABLED for single-user mode
+  // The default admin user is created with all fields pre-populated
+  const needsProfileCompletion = false;
 
   // Auth actions
   const logout = (): void => {
